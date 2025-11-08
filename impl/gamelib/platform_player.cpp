@@ -24,7 +24,7 @@ void Player::doCreate()
     fixtureDef.density = 1.0f;
     fixtureDef.friction = 0.5f;
     b2CircleShape circleCollider {};
-    circleCollider.m_radius = 4.0f;
+    circleCollider.m_radius = 8.0f;
     fixtureDef.shape = &circleCollider;
     auto playerCollider = m_physicsObject->getB2Body()->CreateFixture(&fixtureDef);
     playerCollider->SetUserData((void*)g_userDataPlayerID);
