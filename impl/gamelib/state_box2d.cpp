@@ -326,7 +326,7 @@ void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
 
     auto cb = FancyCallbackFixtureThingy { &m_player->getB2Body()->GetFixtureList()[0] };
     m_world->getWorld()->RayCast(&cb, m_player->getB2Body()->GetPosition(),
-        m_player->getB2Body()->GetPosition() + jt::Conversion::vec(direction));
+        m_player->getB2Body()->GetPosition() + jt::Conversion::vec(1000.0f * direction));
 
     if (!cb.hitSomething) {
         return;
