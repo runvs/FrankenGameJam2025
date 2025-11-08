@@ -20,6 +20,39 @@
 
 StatePlatformer::StatePlatformer(std::string const& levelName) { m_levelName = levelName; }
 
+class FancyCallbackFixtureThingy : public b2RayCastCallback {
+public:
+    FancyCallbackFixtureThingy(b2Fixture* playerFixture)
+    {
+        hitSomething = false;
+        m_playerFixture = playerFixture;
+        m_distanceToBestHit = std::numeric_limits<float>::max();
+    }
+
+    float32 ReportFixture(
+        b2Fixture* fixture, b2Vec2 const& point, b2Vec2 const& normal, float32 fraction) override
+    {
+        if (fixture == m_playerFixture) {
+            return -1;
+        }
+
+        hitSomething = true;
+        if (fraction < m_distanceToBestHit) {
+            m_distanceToBestHit = fraction;
+            hitPoint = point;
+        }
+
+        return fraction;
+    }
+
+    b2Vec2 hitPoint;
+    bool hitSomething;
+
+private:
+    b2Fixture* m_playerFixture;
+    float m_distanceToBestHit;
+};
+
 void StatePlatformer::onCreate()
 {
     auto contactManager = std::make_shared<jt::Box2DContactManager>();
@@ -48,9 +81,6 @@ void StatePlatformer::onCreate()
     // add(m_scanlines);
 
     setAutoDraw(false);
-
-    shootString(0, jt::Vector2f { 0.6, -2.6 });
-    shootString(1, jt::Vector2f { 4.2, -2.2 });
 }
 
 void StatePlatformer::onEnter() { }
@@ -181,6 +211,9 @@ void StatePlatformer::CreatePlayer()
     m_player->setLevelSize(m_level->getLevelSizeInPixel());
     add(m_player);
 
+    m_player->setStringFireCallback(
+        [this](int const index, jt::Vector2f const& dir) { shootString(index, dir); });
+
     createPlayerWalkParticles();
     createPlayerJumpParticleSystem();
 }
@@ -276,6 +309,7 @@ std::string StatePlatformer::getName() const { return "Box2D"; }
 
 void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
 {
+    std::cout << direction.x << "|" << direction.y << std::endl;
     auto& existingString = m_activeStrings[stringIndex];
     // TODO: grab string from array or so
     if (existingString != nullptr && existingString->isAlive()) {
@@ -285,9 +319,22 @@ void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
     }
 
     // TODO: raycast into direction, target is first thing hit
+
+    b2RayCastOutput rcOut {};
+    b2RayCastInput rcInput {};
+    rcInput.maxFraction = 10000;
+
+    auto cb = FancyCallbackFixtureThingy { &m_player->getB2Body()->GetFixtureList()[0] };
+    m_world->getWorld()->RayCast(&cb, m_player->getB2Body()->GetPosition(),
+        m_player->getB2Body()->GetPosition() + jt::Conversion::vec(direction));
+
+    if (!cb.hitSomething) {
+        return;
+    }
+
     b2BodyDef target;
     target.fixedRotation = true;
-    target.position = m_player->getB2Body()->GetPosition() + jt::Conversion::vec(direction * 100.0);
+    target.position = cb.hitPoint;
     target.type = b2_kinematicBody;
 
     auto anchor = std::make_shared<jt::Box2DObject>(m_world, &target);
