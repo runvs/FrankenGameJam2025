@@ -3,6 +3,7 @@
 #include <color/color.hpp>
 #include <drawable_helpers.hpp>
 #include <game_interface.hpp>
+#include <state_box2d.hpp>
 #include <game_properties.hpp>
 #include <input/input_manager.hpp>
 #include <lerp.hpp>
@@ -214,7 +215,7 @@ void StateMenu::startTransitionToStateGame()
     if (!m_started) {
         m_started = true;
         getGame()->stateManager().storeCurrentState("menu");
-        getGame()->stateManager().switchState(std::make_shared<StateGame>());
+        getGame()->stateManager().switchState(std::make_shared<StatePlatformer>());
     }
 }
 
