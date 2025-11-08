@@ -269,16 +269,16 @@ void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
         m_string1->destroy();
     }
 
-
     // TODO: raycast into direction, target is first thing hit
     b2BodyDef target;
     target.fixedRotation = true;
-    target.position = {140.0, 50.0};
+    target.position = { 140.0, 50.0 };
     target.type = b2_kinematicBody;
 
     m_anchor = std::make_shared<jt::Box2DObject>(m_world, &target);
     // TODO: Fancily shoot string outwards
-    m_string1 = std::make_shared<SpiderString>(m_world, m_player->getB2Body(), m_anchor->getB2Body());
+    m_string1
+        = std::make_shared<SpiderString>(m_world, m_player->getB2Body(), m_anchor->getB2Body());
     add(m_string1);
     m_string1->withDebugCircle();
 }

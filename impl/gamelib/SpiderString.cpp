@@ -6,18 +6,16 @@
 #include <iostream>
 
 SpiderString::SpiderString(
-    std::shared_ptr<jt::Box2DWorldInterface> const& world,
-    b2Body* const from,
-    b2Body* const to)
+    std::shared_ptr<jt::Box2DWorldInterface> const& world, b2Body* const from, b2Body* const to)
 {
     // auto massData = new b2MassData();
     // massData->mass = 100000000.0;
     // from->SetMassData(massData);
     auto dJoint = b2DistanceJointDef {};
     dJoint.bodyA = from;
-    dJoint.localAnchorA = b2Vec2 {0.0, 0.0};
+    dJoint.localAnchorA = b2Vec2 { 0.0, 0.0 };
     dJoint.bodyB = to;
-    dJoint.localAnchorB = b2Vec2 {0.0, 0.0}; // TODO needs to be local raycast hit point
+    dJoint.localAnchorB = b2Vec2 { 0.0, 0.0 }; // TODO needs to be local raycast hit point
 
     dJoint.length = (from->GetPosition() - to->GetPosition()).Length() * 0.8;
     dJoint.frequencyHz = .5;
@@ -25,9 +23,8 @@ SpiderString::SpiderString(
 
     auto const distanceJoint = world->createJoint(&dJoint);
     m_line = std::make_shared<jt::Line>();
-    m_distance_joint = std::shared_ptr<b2Joint>(distanceJoint, [world](b2Joint* joint) {
-        world->destroyJoint(joint);
-    });
+    m_distance_joint = std::shared_ptr<b2Joint>(
+        distanceJoint, [world](b2Joint* joint) { world->destroyJoint(joint); });
 
     // auto rJoint = b2RopeJointDef {};
     // rJoint.bodyA = from;
@@ -37,7 +34,7 @@ SpiderString::SpiderString(
     // rJoint.maxLength = 50.0;
     // auto const ropeJoint = world->createJoint(&rJoint);
     // m_rope_joint = std::shared_ptr<b2Joint>(ropeJoint, [world](b2Joint* joint) {
-        // world->destroyJoint(joint);
+    // world->destroyJoint(joint);
     // });
 }
 
@@ -60,10 +57,7 @@ void SpiderString::doUpdate(float elapsed)
 
 void SpiderString::withDebugCircle()
 {
-    m_debugCircle = jt::dh::createShapeCircle(
-        2.0,
-        jt::Color{255,0,0,255},
-        textureManager());
+    m_debugCircle = jt::dh::createShapeCircle(2.0, jt::Color { 255, 0, 0, 255 }, textureManager());
 
     m_debugCircle->setPosition(jt::Conversion::vec(m_distance_joint->GetBodyB()->GetPosition()));
     m_debugCircle->setOffset(jt::OffsetMode::CENTER);
@@ -73,7 +67,7 @@ void SpiderString::doDraw() const
 {
     if (m_debugCircle != nullptr) {
         m_debugCircle->draw(renderTarget());
-    }
 
-    m_line->draw(renderTarget());
+        m_line->draw(renderTarget());
+    }
 }
