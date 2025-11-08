@@ -110,7 +110,6 @@ void Player::updateAnimation(float elapsed)
 
 void Player::handleMovement(float const elapsed)
 {
-    auto const horizontalAcceleration = 15000.0f;
     auto const maxHorizontalVelocity = 90.0f;
     auto const horizontalDampening = 130.0f;
 
