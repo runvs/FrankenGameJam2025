@@ -2,6 +2,7 @@
 
 #include "contact_callback_player_enemy.hpp"
 #include "contact_callback_player_ground.hpp"
+#include "conversions.hpp"
 #include "game_properties.hpp"
 #include "state_menu.hpp"
 #include <box2dwrapper/box2d_contact_manager.hpp>
@@ -48,7 +49,8 @@ void StatePlatformer::onCreate()
 
     setAutoDraw(false);
 
-    shootString(0, jt::Vector2f {});
+    shootString(0, jt::Vector2f { 0.6, -2.6 });
+    shootString(1, jt::Vector2f { 4.2, -2.2 });
 }
 
 void StatePlatformer::onEnter() { }
@@ -61,7 +63,12 @@ void StatePlatformer::loadLevel()
 
 void StatePlatformer::onUpdate(float const elapsed)
 {
-    m_string1->update(elapsed);
+    for (auto m_active_string : m_activeStrings) {
+        if (m_active_string != nullptr && m_active_string->isAlive()) {
+            m_active_string->update(elapsed);
+        }
+    }
+
     if (!m_ending && !getGame()->stateManager().getTransition()->isInProgress()) {
         std::int32_t const velocityIterations = 20;
         std::int32_t const positionIterations = 20;
@@ -160,7 +167,11 @@ void StatePlatformer::onDraw() const
     // m_scanlines->draw();
     m_vignette->draw();
 
-    m_string1->draw();
+    for (auto m_active_string : m_activeStrings) {
+        if (m_active_string != nullptr && m_active_string->isAlive()) {
+            m_active_string->draw();
+        }
+    }
 }
 
 void StatePlatformer::CreatePlayer()
@@ -265,22 +276,28 @@ std::string StatePlatformer::getName() const { return "Box2D"; }
 
 void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
 {
+    auto& existingString = m_activeStrings[stringIndex];
     // TODO: grab string from array or so
-    if (m_string1 != nullptr && m_string1->isAlive()) {
-        // TODO: Detach string from spooder, don't destroy it
-        m_string1->destroy();
+    if (existingString != nullptr && existingString->isAlive()) {
+        // TODO: Just detach string from spooder, don't destroy it
+        existingString.reset();
+        m_tempStringAnchors[stringIndex].reset();
     }
 
     // TODO: raycast into direction, target is first thing hit
     b2BodyDef target;
     target.fixedRotation = true;
-    target.position = { 140.0, 50.0 };
+    target.position = m_player->getB2Body()->GetPosition() + jt::Conversion::vec(direction * 100.0);
     target.type = b2_kinematicBody;
 
-    m_anchor = std::make_shared<jt::Box2DObject>(m_world, &target);
+    auto anchor = std::make_shared<jt::Box2DObject>(m_world, &target);
+
     // TODO: Fancily shoot string outwards
-    m_string1
-        = std::make_shared<SpiderString>(m_world, m_player->getB2Body(), m_anchor->getB2Body());
-    add(m_string1);
-    m_string1->withDebugCircle();
+    existingString
+        = std::make_shared<SpiderString>(m_world, m_player->getB2Body(), anchor->getB2Body());
+    add(existingString);
+    existingString->withDebugCircle();
+
+    m_activeStrings[stringIndex] = existingString;
+    m_tempStringAnchors[stringIndex] = anchor;
 }

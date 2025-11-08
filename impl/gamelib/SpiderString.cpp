@@ -8,9 +8,6 @@
 SpiderString::SpiderString(
     std::shared_ptr<jt::Box2DWorldInterface> const& world, b2Body* const from, b2Body* const to)
 {
-    // auto massData = new b2MassData();
-    // massData->mass = 100000000.0;
-    // from->SetMassData(massData);
     auto dJoint = b2DistanceJointDef {};
     dJoint.bodyA = from;
     dJoint.localAnchorA = b2Vec2 { 0.0, 0.0 };
@@ -40,9 +37,9 @@ SpiderString::SpiderString(
 
 void SpiderString::doUpdate(float elapsed)
 {
-    auto a = m_distance_joint->GetBodyA()->GetPosition();
-    auto b = m_distance_joint->GetBodyB()->GetPosition();
-    std::cout << a.x << "|" << a.y << "<-->" << b.x << "|" << b.y << std::endl;
+    // auto a = m_distance_joint->GetBodyA()->GetPosition();
+    // auto b = m_distance_joint->GetBodyB()->GetPosition();
+    // std::cout << a.x << "|" << a.y << "<-->" << b.x << "|" << b.y << std::endl;
     auto spiderPos = jt::Conversion::vec(m_distance_joint->GetBodyA()->GetPosition());
     auto targetPos = jt::Conversion::vec(m_distance_joint->GetBodyB()->GetPosition());
 

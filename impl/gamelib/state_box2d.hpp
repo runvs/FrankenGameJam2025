@@ -23,13 +23,14 @@ private:
     std::string m_levelName { "" };
     std::shared_ptr<Level> m_level { nullptr };
     std::shared_ptr<Player> m_player { nullptr };
-    std::shared_ptr<jt::Box2DObject> m_anchor { nullptr };
-    std::shared_ptr<SpiderString> m_string1 { nullptr };
     std::shared_ptr<jt::Vignette> m_vignette { nullptr };
     std::shared_ptr<jt::ScanLines> m_scanlines { nullptr };
 
     std::shared_ptr<jt::ParticleSystem<jt::Shape, 50>> m_walkParticles { nullptr };
     std::shared_ptr<jt::ParticleSystem<jt::Shape, 50>> m_playerJumpParticles { nullptr };
+
+    std::array<std::shared_ptr<SpiderString>, 4> m_activeStrings {};
+    std::array<std::shared_ptr<jt::Box2DObject>, 4> m_tempStringAnchors {};
 
     bool m_ending { false };
 
