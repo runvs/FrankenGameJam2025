@@ -14,8 +14,8 @@ SpiderString::SpiderString(
     dJoint.bodyB = to;
     dJoint.localAnchorB = b2Vec2 { 0.0, 0.0 }; // TODO needs to be local raycast hit point
 
-    dJoint.length = (from->GetPosition() - to->GetPosition()).Length() * 0.8;
-    dJoint.frequencyHz = .5;
+    dJoint.length = (from->GetPosition() - to->GetPosition()).Length() * 0.75f;
+    dJoint.frequencyHz = 0.5;
     dJoint.dampingRatio = 0.01;
 
     auto const distanceJoint = world->createJoint(&dJoint);

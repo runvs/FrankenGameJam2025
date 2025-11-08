@@ -59,7 +59,7 @@ void StatePlatformer::onCreate()
     auto loggingContactManager
         = std::make_shared<jt::LoggingBox2DContactManager>(contactManager, getGame()->logger());
     m_world = std::make_shared<jt::Box2DWorldImpl>(
-        jt::Vector2f { 0.0f, 400.0f }, loggingContactManager);
+        jt::Vector2f { 0.0f, 200.0f }, loggingContactManager);
 
     loadLevel();
 
@@ -309,20 +309,13 @@ std::string StatePlatformer::getName() const { return "Box2D"; }
 
 void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
 {
-    std::cout << direction.x << "|" << direction.y << std::endl;
+    // std::cout << direction.x << "|" << direction.y << std::endl;
     auto& existingString = m_activeStrings[stringIndex];
-    // TODO: grab string from array or so
+
     if (existingString != nullptr && existingString->isAlive()) {
-        // TODO: Just detach string from spooder, don't destroy it
         existingString.reset();
         m_tempStringAnchors[stringIndex].reset();
     }
-
-    // TODO: raycast into direction, target is first thing hit
-
-    b2RayCastOutput rcOut {};
-    b2RayCastInput rcInput {};
-    rcInput.maxFraction = 10000;
 
     auto cb = FancyCallbackFixtureThingy { &m_player->getB2Body()->GetFixtureList()[0] };
     m_world->getWorld()->RayCast(&cb, m_player->getB2Body()->GetPosition(),
