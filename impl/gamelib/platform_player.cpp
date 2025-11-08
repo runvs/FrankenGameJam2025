@@ -51,22 +51,6 @@ void Player::doUpdate(float const elapsed)
     updateAnimation(elapsed);
     handleMovement(elapsed);
 
-    if (m_isTouchingGround != m_wasTouchingGroundLastFrame) {
-        auto count = 25;
-        if (m_wasTouchingGroundLastFrame) {
-            count = 10;
-        }
-        auto ps = m_postJumpParticles.lock();
-        if (ps) {
-            ps->fire(count, currentPosition + jt::Vector2f { 0.0f, 5.0f });
-        }
-    }
-    m_wasTouchingGroundLastFrame = m_isTouchingGround;
-
-    m_lastTouchedGroundTimer -= elapsed;
-    m_lastJumpTimer -= elapsed;
-    m_wantsToJumpTimer -= elapsed;
-
     m_crosshairH->update(elapsed);
     m_crosshairV->update(elapsed);
 }
@@ -81,50 +65,23 @@ void Player::clampPositionToLevelSize(jt::Vector2f& currentPosition) const
     }
 }
 
-void Player::updateAnimation(float elapsed)
-{
-    if (m_physicsObject->getVelocity().x > 0) {
-        m_isMoving = true;
-    } else if (m_physicsObject->getVelocity().x < 0) {
-        m_isMoving = true;
-    } else {
-        m_isMoving = false;
-    }
-    auto const v = m_horizontalMovement ? abs(m_physicsObject->getVelocity().x) / 90.0f : 0.0f;
-    m_animation->setAnimationSpeedFactor(v);
-    m_animation->update(elapsed);
-
-    m_walkParticlesTimer -= elapsed * v;
-    if (m_walkParticlesTimer <= 0) {
-        m_walkParticlesTimer = 0.15f;
-        if (m_isMoving && m_isTouchingGround) {
-            auto ps = m_walkParticles.lock();
-            if (ps) {
-                ps->fire(1, getPosition());
-            }
-        }
-    }
-}
+void Player::updateAnimation(float elapsed) { m_animation->update(elapsed); }
 
 void Player::handleMovement(float const elapsed)
 {
-    m_horizontalMovement = false;
-
     auto v = m_physicsObject->getVelocity();
     auto const kb = getGame()->input().keyboard().get();
     auto gp = getGame()->input().gamepad(0).get();
 
     jt::Vector2f gpAxis = gp->getAxis(jt::GamepadAxisCode::ALeft);
 
-    if (jt::MathHelper::lengthSquared(gpAxis) > 0.125f) {
+    if (jt::MathHelper::lengthSquared(gpAxis) > 0.005f) {
         jt::MathHelper::normalizeMe(gpAxis);
-
-        m_crosshairPos = getPosition();
-        m_crosshairPos += 48.0f * gpAxis;
-
-        m_crosshairH->setPosition(m_crosshairPos - jt::Vector2f { 8.0f, 0.0f });
-        m_crosshairV->setPosition(m_crosshairPos - jt::Vector2f { 0.0f, 8.0f });
+        m_gpAxis = 48.0f * gpAxis;
     }
+    m_crosshairPos = getPosition() + m_gpAxis;
+    m_crosshairH->setPosition(m_crosshairPos - jt::Vector2f { 8.0f, 0.0f });
+    m_crosshairV->setPosition(m_crosshairPos - jt::Vector2f { 0.0f, 8.0f });
 
     if (m_fireStringCallback) {
         if (gp->justPressed(jt::GamepadButtonCode::GBA)) {
@@ -148,14 +105,7 @@ void Player::doDraw() const
     m_crosshairV->draw(renderTarget());
 }
 
-void Player::setTouchesGround(bool touchingGround)
-{
-    auto const m_postDropJumpTimeFrame = 0.2f;
-    m_isTouchingGround = touchingGround;
-    if (m_isTouchingGround) {
-        m_lastTouchedGroundTimer = m_postDropJumpTimeFrame;
-    }
-}
+void Player::setTouchesGround(bool /*touchingGround*/) { }
 
 jt::Vector2f Player::getPosOnScreen() const { return m_animation->getScreenPosition(); }
 
@@ -163,15 +113,9 @@ void Player::setPosition(jt::Vector2f const& pos) { m_physicsObject->setPosition
 
 jt::Vector2f Player::getPosition() const { return m_physicsObject->getPosition(); }
 
-void Player::setWalkParticleSystem(std::weak_ptr<jt::ParticleSystem<jt::Shape, 50>> ps)
-{
-    m_walkParticles = ps;
-}
+void Player::setWalkParticleSystem(std::weak_ptr<jt::ParticleSystem<jt::Shape, 50>> ps) { }
 
-void Player::setJumpParticleSystem(std::weak_ptr<jt::ParticleSystem<jt::Shape, 50>> ps)
-{
-    m_postJumpParticles = ps;
-}
+void Player::setJumpParticleSystem(std::weak_ptr<jt::ParticleSystem<jt::Shape, 50>> ps) { }
 
 void Player::setLevelSize(jt::Vector2f const& levelSizeInTiles)
 {
@@ -183,16 +127,4 @@ void Player::setStringFireCallback(std::function<void(int, jt::Vector2f const&)>
     m_fireStringCallback = callback;
 }
 
-bool Player::canJump() const
-{
-    if (m_lastJumpTimer >= 0.0f) {
-        return false;
-    }
-    if (m_isTouchingGround) {
-        return true;
-    }
-    if (m_lastTouchedGroundTimer > 0) {
-        return true;
-    }
-    return false;
-}
+bool Player::canJump() const { return false; }
