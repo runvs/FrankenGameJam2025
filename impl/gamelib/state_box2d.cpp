@@ -13,6 +13,8 @@
 #include <tweens/tween_position.hpp>
 #include <tweens/tween_rotation.hpp>
 
+#include "SpiderString.h"
+
 StatePlatformer::StatePlatformer(std::string const& levelName) { m_levelName = levelName; }
 
 void StatePlatformer::onCreate()
@@ -26,6 +28,17 @@ void StatePlatformer::onCreate()
     loadLevel();
 
     CreatePlayer();
+
+    b2BodyDef bodyDef;
+    bodyDef.fixedRotation = true;
+    bodyDef.position = {50.0, 50.0};
+    bodyDef.type = b2_kinematicBody;
+
+    m_anchor = std::make_shared<jt::Box2DObject>(m_world, &bodyDef);
+
+    m_string1 = std::make_shared<SpiderString>(
+        m_world, m_player->getB2Body(), m_anchor->getB2Body());
+
     auto playerGroundContactListener = std::make_shared<ContactCallbackPlayerGround>();
     playerGroundContactListener->setPlayer(m_player);
     m_world->getContactManager().registerCallback("player_ground", playerGroundContactListener);
@@ -54,6 +67,7 @@ void StatePlatformer::loadLevel()
 
 void StatePlatformer::onUpdate(float const elapsed)
 {
+    m_string1->update();
     if (!m_ending && !getGame()->stateManager().getTransition()->isInProgress()) {
         std::int32_t const velocityIterations = 20;
         std::int32_t const positionIterations = 20;

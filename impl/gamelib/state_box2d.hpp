@@ -13,6 +13,8 @@
 #include <screeneffects/vignette.hpp>
 #include <shape.hpp>
 
+class SpiderString;
+
 class StatePlatformer : public jt::GameState {
 public:
     explicit StatePlatformer(std::string const& levelName = "platformer_0_0.json");
@@ -23,6 +25,8 @@ private:
     std::string m_levelName { "" };
     std::shared_ptr<Level> m_level { nullptr };
     std::shared_ptr<Player> m_player { nullptr };
+    std::shared_ptr<jt::Box2DObject> m_anchor { nullptr };
+    std::shared_ptr<SpiderString> m_string1 { nullptr };
     std::shared_ptr<jt::Vignette> m_vignette { nullptr };
     std::shared_ptr<jt::ScanLines> m_scanlines { nullptr };
 
