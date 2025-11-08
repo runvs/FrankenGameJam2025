@@ -63,6 +63,9 @@ private:
     void updateAnimation(float elapsed);
     void clampPositionToLevelSize(jt::Vector2f& currentPosition) const;
     bool m_horizontalMovement { false };
+    jt::Vector2f m_crosshairPos { 0.0f, 0.0f };
+
+    std::function<void(int, jt::Vector2f const&)> m_fireStringCallback { nullptr };
 };
 
 #endif // JAMTEMPLATE_DEMO_PLATFORM_PLAYER

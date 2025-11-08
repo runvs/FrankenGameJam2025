@@ -132,11 +132,23 @@ void Player::handleMovement(float const elapsed)
     if (jt::MathHelper::lengthSquared(gpAxis) > 0.125f) {
         jt::MathHelper::normalizeMe(gpAxis);
 
-        auto crosshairPos = getPosition();
-        crosshairPos += 48.0f * gpAxis;
+        m_crosshairPos = getPosition();
+        m_crosshairPos += 48.0f * gpAxis;
 
-        m_crosshairH->setPosition(crosshairPos - jt::Vector2f { 8.0f, 0.0f });
-        m_crosshairV->setPosition(crosshairPos - jt::Vector2f { 0.0f, 8.0f });
+        m_crosshairH->setPosition(m_crosshairPos - jt::Vector2f { 8.0f, 0.0f });
+        m_crosshairV->setPosition(m_crosshairPos - jt::Vector2f { 0.0f, 8.0f });
+    }
+
+    if (m_fireStringCallback) {
+        if (gp->justPressed(jt::GamepadButtonCode::GBA)) {
+            m_fireStringCallback(0, gpAxis);
+        } else if (gp->justPressed(jt::GamepadButtonCode::GBB)) {
+            m_fireStringCallback(1, gpAxis);
+        } else if (gp->justPressed(jt::GamepadButtonCode::GBX)) {
+            m_fireStringCallback(2, gpAxis);
+        } else if (gp->justPressed(jt::GamepadButtonCode::GBY)) {
+            m_fireStringCallback(3, gpAxis);
+        }
     }
 
     if (m_wantsToJumpTimer >= 0.0f) {
@@ -146,13 +158,6 @@ void Player::handleMovement(float const elapsed)
             v.y = jumpInitialVelocity;
         }
     }
-
-    if (kb->pressed(jt::KeyCode::W) || gp->pressed(jt::GamepadButtonCode::GBA)) {
-        if (v.y < 0) {
-            b2b->ApplyForceToCenter(b2Vec2 { 0, jumpVerticalAcceleration }, true);
-        }
-    }
-
     if (v.y >= maxVerticalVelocity) {
         v.y = maxVerticalVelocity;
     }
@@ -220,7 +225,9 @@ void Player::setLevelSize(jt::Vector2f const& levelSizeInTiles)
     m_levelSizeInTiles = levelSizeInTiles;
 }
 
-void Player::setStringFireCallback(std::function<void(int, jt::Vector2f const&)> const& callback) {
+void Player::setStringFireCallback(std::function<void(int, jt::Vector2f const&)> const& callback)
+{
+    m_fireStringCallback = callback;
 }
 
 bool Player::canJump() const
