@@ -131,7 +131,7 @@ void Level::loadLevelCollisions(jt::tilemap::TilesonLoader& loader)
 {
     auto tileCollisions = loader.loadCollisionsFromLayer("ground");
 
-    tileCollisions.refineColliders(32);
+    tileCollisions.refineColliders(16);
     for (auto const& r : tileCollisions.getRects()) {
         b2BodyDef bodyDef;
         bodyDef.fixedRotation = true;

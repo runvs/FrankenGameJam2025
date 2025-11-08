@@ -16,6 +16,7 @@ public:
     void doDraw() const override;
 
     void withDebugCircle();
+    void setStringColor(jt::Color const& c);
 
 private:
     std::shared_ptr<jt::Line> m_line;

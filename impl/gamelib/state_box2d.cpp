@@ -336,6 +336,18 @@ void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
     existingString
         = std::make_shared<SpiderString>(m_world, m_player->getB2Body(), anchor->getB2Body());
     add(existingString);
+    jt::Color c;
+
+    if (stringIndex == 0) {
+        c = jt::Color { 16, 185, 16, 255 };
+    } else if (stringIndex == 1) {
+        c = jt::Color { 230, 41, 55, 255 };
+    } else if (stringIndex == 2) {
+        c = jt::Color { 0, 122, 204, 255 };
+    } else if (stringIndex == 3) {
+        c = jt::Color { 255, 211, 0, 255 };
+    }
+    existingString->setStringColor(c);
     existingString->withDebugCircle();
 
     m_activeStrings[stringIndex] = existingString;

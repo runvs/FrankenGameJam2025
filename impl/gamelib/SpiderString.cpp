@@ -60,6 +60,8 @@ void SpiderString::withDebugCircle()
     m_debugCircle->setOffset(jt::OffsetMode::CENTER);
 }
 
+void SpiderString::setStringColor(jt::Color const& c) { m_line->setColor(c); }
+
 void SpiderString::doDraw() const
 {
     if (m_debugCircle != nullptr) {
