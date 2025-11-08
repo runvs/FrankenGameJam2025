@@ -30,6 +30,7 @@ public:
     void setJumpParticleSystem(std::weak_ptr<jt::ParticleSystem<jt::Shape, 50>> ps);
 
     void setLevelSize(jt::Vector2f const& levelSizeInTiles);
+    void setStringFireCallback(std::function<void(int, jt::Vector2f const&)> const& callback);
 
 private:
     std::shared_ptr<jt::Animation> m_animation;

@@ -220,6 +220,9 @@ void Player::setLevelSize(jt::Vector2f const& levelSizeInTiles)
     m_levelSizeInTiles = levelSizeInTiles;
 }
 
+void Player::setStringFireCallback(std::function<void(int, jt::Vector2f const&)> const& callback) {
+}
+
 bool Player::canJump() const
 {
     if (m_lastJumpTimer >= 0.0f) {
