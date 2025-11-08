@@ -16,8 +16,8 @@ void Player::doCreate()
 {
     m_animation = std::make_shared<jt::Animation>();
 
-    m_animation->loadFromJson("assets/hero_8x8.json", textureManager());
-    m_animation->play("right");
+    m_animation->loadFromAseprite("assets/arachno.aseprite", textureManager());
+    m_animation->play("idle");
     m_animation->setOffset(jt::OffsetMode::CENTER);
 
     b2FixtureDef fixtureDef;
@@ -84,10 +84,8 @@ void Player::clampPositionToLevelSize(jt::Vector2f& currentPosition) const
 void Player::updateAnimation(float elapsed)
 {
     if (m_physicsObject->getVelocity().x > 0) {
-        m_animation->play("right");
         m_isMoving = true;
     } else if (m_physicsObject->getVelocity().x < 0) {
-        m_animation->play("left");
         m_isMoving = true;
     } else {
         m_isMoving = false;

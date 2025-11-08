@@ -31,13 +31,13 @@ void StatePlatformer::onCreate()
 
     b2BodyDef bodyDef;
     bodyDef.fixedRotation = true;
-    bodyDef.position = {50.0, 50.0};
+    bodyDef.position = { 50.0, 50.0 };
     bodyDef.type = b2_kinematicBody;
 
     m_anchor = std::make_shared<jt::Box2DObject>(m_world, &bodyDef);
 
-    m_string1 = std::make_shared<SpiderString>(
-        m_world, m_player->getB2Body(), m_anchor->getB2Body());
+    m_string1
+        = std::make_shared<SpiderString>(m_world, m_player->getB2Body(), m_anchor->getB2Body());
 
     auto playerGroundContactListener = std::make_shared<ContactCallbackPlayerGround>();
     playerGroundContactListener->setPlayer(m_player);
@@ -52,7 +52,7 @@ void StatePlatformer::onCreate()
 
     m_scanlines = std::make_shared<jt::ScanLines>(
         jt::Vector2f { GP::GetScreenSize().x, GP::GetScreenSize().y / 256 }, 256);
-    add(m_scanlines);
+    // add(m_scanlines);
 
     setAutoDraw(false);
 }
@@ -163,7 +163,7 @@ void StatePlatformer::onDraw() const
     m_player->draw();
     m_walkParticles->draw();
     m_playerJumpParticles->draw();
-    m_scanlines->draw();
+    // m_scanlines->draw();
     m_vignette->draw();
 }
 
