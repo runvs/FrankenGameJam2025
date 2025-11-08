@@ -2,12 +2,12 @@
 #define JAMTEMPLATE_LEVEL_HPP
 
 #include <bee.hpp>
-#include <exit.hpp>
-#include <killbox.hpp>
-#include <moving_platform.hpp>
 #include <box2dwrapper/box2d_object.hpp>
 #include <box2dwrapper/box2d_world_interface.hpp>
+#include <exit.hpp>
 #include <game_object.hpp>
+#include <killbox.hpp>
+#include <moving_platform.hpp>
 #include <shape.hpp>
 #include <tilemap/tile_layer.hpp>
 #include <tilemap/tileson_loader.hpp>

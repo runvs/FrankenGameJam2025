@@ -108,17 +108,6 @@ void Player::updateAnimation(float elapsed)
 
 void Player::handleMovement(float const elapsed)
 {
-    auto const maxHorizontalVelocity = 90.0f;
-    auto const horizontalDampening = 130.0f;
-
-    auto const jumpInitialVelocity = -140.0f;
-    auto const maxVerticalVelocity = 100.0f;
-    auto const jumpVerticalAcceleration = -9500.0f;
-
-    auto const jumpDeadTime = 0.3f;
-    auto const preLandJumpTimeFrame = 0.1f;
-
-    auto b2b = getB2Body();
     m_horizontalMovement = false;
 
     auto v = m_physicsObject->getVelocity();
@@ -148,40 +137,6 @@ void Player::handleMovement(float const elapsed)
             m_fireStringCallback(3, gpAxis);
         }
     }
-
-    if (m_wantsToJumpTimer >= 0.0f) {
-        if (canJump()) {
-
-            m_lastJumpTimer = jumpDeadTime;
-            v.y = jumpInitialVelocity;
-        }
-    }
-    if (v.y >= maxVerticalVelocity) {
-        v.y = maxVerticalVelocity;
-    }
-    // clamp horizontal Velocity
-    if (v.x >= maxHorizontalVelocity) {
-        v.x = maxHorizontalVelocity;
-    } else if (v.x <= -maxHorizontalVelocity) {
-        v.x = -maxHorizontalVelocity;
-    }
-
-    // damp horizontal movement
-    if (!m_horizontalMovement) {
-        if (v.x > 0) {
-            v.x -= horizontalDampening * elapsed;
-            if (v.x < 0) {
-                v.x = 0;
-            }
-        } else if (v.x < 0) {
-            v.x += horizontalDampening * elapsed;
-            if (v.x > 0) {
-                v.x = 0;
-            }
-        }
-    }
-
-    m_physicsObject->setVelocity(v);
 }
 
 b2Body* Player::getB2Body() { return m_physicsObject->getB2Body(); }

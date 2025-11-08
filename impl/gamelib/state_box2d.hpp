@@ -4,8 +4,6 @@
 #include "screeneffects/scanlines.hpp"
 #include <box2dwrapper/box2d_object.hpp>
 #include <box2dwrapper/box2d_world_interface.hpp>
-#include <contact_callback_player_enemy.hpp>
-#include <contact_callback_player_ground.hpp>
 #include <game_state.hpp>
 #include <level.hpp>
 #include <particle_system.hpp>
@@ -36,6 +34,7 @@ private:
     bool m_ending { false };
 
     std::string getName() const override;
+    void shootString(int stringIndex, jt::Vector2f direction);
 
     void onCreate() override;
     void onEnter() override;
