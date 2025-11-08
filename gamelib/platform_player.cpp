@@ -121,23 +121,23 @@ void Player::handleMovement(float const elapsed)
     auto v = m_physicsObject->getVelocity();
     auto const kb = getGame()->input().keyboard().get();
     auto gp = getGame()->input().gamepad(0).get();
-    // auto const dpad = gp->getAxis(jt::GamepadAxisCode::DPad);
-    //
-    // if (kb->pressed(jt::KeyCode::D) || dpad.x > 0.5f) {
-    //     if (v.x < 0) {
-    //         v.x *= 0.9f;
-    //     }
-    //     b2b->ApplyForceToCenter(b2Vec2 { horizontalAcceleration, 0 }, true);
-    //     m_horizontalMovement = true;
-    // }
-    //
-    // if (kb->pressed(jt::KeyCode::A) || dpad.x < -0.5f) {
-    //     if (v.x > 0) {
-    //         v.x *= 0.9f;
-    //     }
-    //     b2b->ApplyForceToCenter(b2Vec2 { -horizontalAcceleration, 0 }, true);
-    //     m_horizontalMovement = true;
-    // }
+    auto const dpad = gp->getAxis(jt::GamepadAxisCode::DPad);
+
+    if (kb->pressed(jt::KeyCode::D) || dpad.x > 0.5f) {
+        if (v.x < 0) {
+            v.x *= 0.9f;
+        }
+        b2b->ApplyForceToCenter(b2Vec2 { horizontalAcceleration, 0 }, true);
+        m_horizontalMovement = true;
+    }
+
+    if (kb->pressed(jt::KeyCode::A) || dpad.x < -0.5f) {
+        if (v.x > 0) {
+            v.x *= 0.9f;
+        }
+        b2b->ApplyForceToCenter(b2Vec2 { -horizontalAcceleration, 0 }, true);
+        m_horizontalMovement = true;
+    }
 
     if (kb->justPressed(jt::KeyCode::W) || gp->justPressed(jt::GamepadButtonCode::GBA)) {
         if (m_wantsToJumpTimer <= 0.0f) {
