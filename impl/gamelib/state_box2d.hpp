@@ -36,6 +36,7 @@ private:
     bool m_ending { false };
 
     std::string getName() const override;
+    void shootString(int stringIndex, jt::Vector2f direction);
 
     void onCreate() override;
     void onEnter() override;

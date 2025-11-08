@@ -12,9 +12,16 @@ class SpiderString : public jt::GameObject {
             b2Body* from,
             b2Body* to);
 
-        std::shared_ptr<b2Joint> m_joint;
+        std::shared_ptr<b2Joint> m_distance_joint;
+        std::shared_ptr<b2Joint> m_rope_joint;
 
-    void update();
+        void doUpdate(float elapsed) override;
+        void doDraw() const override;
+
+        void withDebugCircle();
+    private:
+        std::shared_ptr<jt::Line> m_line;
+        std::shared_ptr<jt::Shape> m_debugCircle;
 
 };
 

@@ -29,16 +29,6 @@ void StatePlatformer::onCreate()
 
     CreatePlayer();
 
-    b2BodyDef bodyDef;
-    bodyDef.fixedRotation = true;
-    bodyDef.position = {50.0, 50.0};
-    bodyDef.type = b2_kinematicBody;
-
-    m_anchor = std::make_shared<jt::Box2DObject>(m_world, &bodyDef);
-
-    m_string1 = std::make_shared<SpiderString>(
-        m_world, m_player->getB2Body(), m_anchor->getB2Body());
-
     auto playerGroundContactListener = std::make_shared<ContactCallbackPlayerGround>();
     playerGroundContactListener->setPlayer(m_player);
     m_world->getContactManager().registerCallback("player_ground", playerGroundContactListener);
@@ -55,6 +45,8 @@ void StatePlatformer::onCreate()
     add(m_scanlines);
 
     setAutoDraw(false);
+
+    shootString(0, jt::Vector2f {});
 }
 
 void StatePlatformer::onEnter() { }
@@ -67,7 +59,7 @@ void StatePlatformer::loadLevel()
 
 void StatePlatformer::onUpdate(float const elapsed)
 {
-    m_string1->update();
+    m_string1->update(elapsed);
     if (!m_ending && !getGame()->stateManager().getTransition()->isInProgress()) {
         std::int32_t const velocityIterations = 20;
         std::int32_t const positionIterations = 20;
@@ -165,6 +157,8 @@ void StatePlatformer::onDraw() const
     m_playerJumpParticles->draw();
     m_scanlines->draw();
     m_vignette->draw();
+
+    m_string1->draw();
 }
 
 void StatePlatformer::CreatePlayer()
@@ -266,3 +260,25 @@ void StatePlatformer::createPlayerWalkParticles()
 }
 
 std::string StatePlatformer::getName() const { return "Box2D"; }
+
+void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
+{
+    // TODO: grab string from array or so
+    if (m_string1 != nullptr && m_string1->isAlive()) {
+        // TODO: Detach string from spooder, don't destroy it
+        m_string1->destroy();
+    }
+
+
+    // TODO: raycast into direction, target is first thing hit
+    b2BodyDef target;
+    target.fixedRotation = true;
+    target.position = {140.0, 50.0};
+    target.type = b2_kinematicBody;
+
+    m_anchor = std::make_shared<jt::Box2DObject>(m_world, &target);
+    // TODO: Fancily shoot string outwards
+    m_string1 = std::make_shared<SpiderString>(m_world, m_player->getB2Body(), m_anchor->getB2Body());
+    add(m_string1);
+    m_string1->withDebugCircle();
+}
