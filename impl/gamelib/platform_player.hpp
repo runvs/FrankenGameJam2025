@@ -1,6 +1,7 @@
 ﻿#ifndef JAMTEMPLATE_DEMO_PLATFORM_PLAYER
 #define JAMTEMPLATE_DEMO_PLATFORM_PLAYER
 
+#include "line.hpp"
 #include <animation.hpp>
 #include <box2dwrapper/box2d_object.hpp>
 #include <game_object.hpp>
@@ -33,6 +34,9 @@ public:
 private:
     std::shared_ptr<jt::Animation> m_animation;
     std::shared_ptr<jt::Box2DObject> m_physicsObject;
+    std::shared_ptr<jt::Line> m_crosshairV;
+    std::shared_ptr<jt::Line> m_crosshairH;
+
     float m_walkParticlesTimer = 0.0f;
     std::weak_ptr<jt::ParticleSystem<jt::Shape, 50>> m_walkParticles;
     std::weak_ptr<jt::ParticleSystem<jt::Shape, 50>> m_postJumpParticles;

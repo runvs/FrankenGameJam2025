@@ -35,6 +35,9 @@ void Player::doCreate()
     fixtureDef.shape = &polygonShape;
     auto footSensorFixture = m_physicsObject->getB2Body()->CreateFixture(&fixtureDef);
     footSensorFixture->SetUserData((void*)g_userDataPlayerFeetID);
+
+    m_crosshairH = std::make_shared<jt::Line>(jt::Vector2f { 16.0f, 0.0f });
+    m_crosshairV = std::make_shared<jt::Line>(jt::Vector2f { 0.0f, 16.0f });
 }
 
 std::shared_ptr<jt::Animation> Player::getAnimation() { return m_animation; }
@@ -63,6 +66,9 @@ void Player::doUpdate(float const elapsed)
     m_lastTouchedGroundTimer -= elapsed;
     m_lastJumpTimer -= elapsed;
     m_wantsToJumpTimer -= elapsed;
+
+    m_crosshairH->update(elapsed);
+    m_crosshairV->update(elapsed);
 }
 
 void Player::clampPositionToLevelSize(jt::Vector2f& currentPosition) const
@@ -121,28 +127,17 @@ void Player::handleMovement(float const elapsed)
     auto v = m_physicsObject->getVelocity();
     auto const kb = getGame()->input().keyboard().get();
     auto gp = getGame()->input().gamepad(0).get();
-    // auto const dpad = gp->getAxis(jt::GamepadAxisCode::DPad);
-    //
-    // if (kb->pressed(jt::KeyCode::D) || dpad.x > 0.5f) {
-    //     if (v.x < 0) {
-    //         v.x *= 0.9f;
-    //     }
-    //     b2b->ApplyForceToCenter(b2Vec2 { horizontalAcceleration, 0 }, true);
-    //     m_horizontalMovement = true;
-    // }
-    //
-    // if (kb->pressed(jt::KeyCode::A) || dpad.x < -0.5f) {
-    //     if (v.x > 0) {
-    //         v.x *= 0.9f;
-    //     }
-    //     b2b->ApplyForceToCenter(b2Vec2 { -horizontalAcceleration, 0 }, true);
-    //     m_horizontalMovement = true;
-    // }
 
-    if (kb->justPressed(jt::KeyCode::W) || gp->justPressed(jt::GamepadButtonCode::GBA)) {
-        if (m_wantsToJumpTimer <= 0.0f) {
-            m_wantsToJumpTimer = preLandJumpTimeFrame;
-        }
+    jt::Vector2f gpAxis = gp->getAxis(jt::GamepadAxisCode::ALeft);
+
+    if (jt::MathHelper::lengthSquared(gpAxis) > 0.125f) {
+        jt::MathHelper::normalizeMe(gpAxis);
+
+        auto crosshairPos = getPosition();
+        crosshairPos += 48.0f * gpAxis;
+
+        m_crosshairH->setPosition(crosshairPos - jt::Vector2f { 8.0f, 0.0f });
+        m_crosshairV->setPosition(crosshairPos - jt::Vector2f { 0.0f, 8.0f });
     }
 
     if (m_wantsToJumpTimer >= 0.0f) {
@@ -189,7 +184,12 @@ void Player::handleMovement(float const elapsed)
 
 b2Body* Player::getB2Body() { return m_physicsObject->getB2Body(); }
 
-void Player::doDraw() const { m_animation->draw(renderTarget()); }
+void Player::doDraw() const
+{
+    m_animation->draw(renderTarget());
+    m_crosshairH->draw(renderTarget());
+    m_crosshairV->draw(renderTarget());
+}
 
 void Player::setTouchesGround(bool touchingGround)
 {
