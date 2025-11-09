@@ -116,6 +116,7 @@ void StatePlatformer::onCreate()
     loadLevel();
 
     CreatePlayer();
+    getGame()->gfx().camera().setCamOffset(m_player->getPosition() - 0.5f * GP::GetScreenSize());
 
     auto playerGroundContactListener = std::make_shared<ContactCallbackPlayerGround>();
     playerGroundContactListener->setPlayer(m_player);
@@ -187,23 +188,6 @@ void StatePlatformer::onUpdate(float const elapsed)
 
         getGame()->stateManager().switchState(std::make_shared<StateMenu>());
     }
-
-    // if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F2)) {
-    //     getGame()->stateManager().switchState(
-    //         std::make_shared<StatePlatformer>("platformer_0_2.json"));
-    // }
-    // if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F3)) {
-    //     getGame()->stateManager().switchState(
-    //         std::make_shared<StatePlatformer>("platformer_0_3.json"));
-    // }
-    // if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F5)) {
-    //     getGame()->stateManager().switchState(
-    //         std::make_shared<StatePlatformer>("platformer_0_5.json"));
-    // }
-    // if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F6)) {
-    //     getGame()->stateManager().switchState(
-    //         std::make_shared<StatePlatformer>("platformer_0_6.json"));
-    // }
 }
 
 void StatePlatformer::endGame()
@@ -220,7 +204,7 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
     auto ps = m_player->getPosOnScreen();
 
     float const topMargin = 150.0f;
-    float const bottomMargin = 150.0f;
+    float const bottomMargin = 50.0f;
     float const rightMargin = 150.0f;
     float const leftMargin = 150.0f;
     float const scrollSpeed = 60.0f;
@@ -254,7 +238,7 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
                 cam.move(jt::Vector2f { 0.0f, -scrollSpeed * elapsed });
             }
         }
-    } else if (ps.y > bottomMargin - topMargin) {
+    } else if (ps.y > screenHeight - bottomMargin) {
         cam.move(jt::Vector2f { 0.0f, scrollSpeed * elapsed });
         if (ps.y > screenHeight - rightMargin / 3 * 2) {
             cam.move(jt::Vector2f { 0.0f, scrollSpeed * elapsed });
