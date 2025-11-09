@@ -46,7 +46,6 @@ void SpiderString::doUpdate(float elapsed)
     if (yb > ya + 10.0f) {
         auto const currentLength = m_distance_joint->GetLength();
         auto newLength = currentLength - GP::PhysicsStringBelowShrinkingValue() * elapsed;
-        std::cout << newLength << std::endl;
         newLength = std::clamp(newLength, 16.0f, 1000000.0f);
         m_distance_joint->SetLength(newLength);
     }
