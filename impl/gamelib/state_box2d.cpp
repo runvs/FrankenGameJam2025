@@ -124,6 +124,8 @@ void StatePlatformer::onUpdate(float const elapsed)
             m_player->getPosition(), [this](std::string const& newLevelName) {
                 if (!m_ending) {
                     m_ending = true;
+                    auto snd = getGame()->audio().addTemporarySound("event:/win-sound");
+                    snd->play();
                     getGame()->stateManager().switchState(
                         std::make_shared<StatePlatformer>(m_playerType, newLevelName));
                 }
@@ -348,6 +350,8 @@ void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
             + jt::Conversion::vec(GP::PhysicsStringMaxLengthInPx() * direction));
 
     if (!cb.hitSomething) {
+        auto snd = getGame()->audio().addTemporarySound("event:/faden-abschießen");
+        snd->play();
         return;
     }
 
@@ -377,4 +381,6 @@ void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
     existingString->setStringColor(c);
 
     m_activeStrings[stringIndex] = existingString;
+    auto snd = getGame()->audio().addTemporarySound("event:/faden-abschießen");
+    snd->play();
 }

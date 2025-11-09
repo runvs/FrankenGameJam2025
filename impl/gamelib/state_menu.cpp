@@ -41,7 +41,7 @@ void StateMenu::onCreate()
         auto bgm = getGame()->audio().getPermanentSound("bgm");
         if (bgm == nullptr) {
             std::cout << "load bgm\n";
-            bgm = getGame()->audio().addPermanentSound("bgm", "event:/music");
+            bgm = getGame()->audio().addPermanentSound("bgm", "event:/main-theme");
             bgm->play();
         }
     } catch (std::exception const& e) {
@@ -217,10 +217,14 @@ void StateMenu::onUpdate(float const elapsed)
 
     auto const& gp = getGame()->input().gamepad(0);
     if (gp->justPressed(jt::GamepadButtonCode::GBA)) {
+        auto snd = getGame()->audio().addTemporarySound("event:/menu-space-bar");
+        snd->play();
         startTransitionToStateGame();
     }
 
     if (gp->justPressed(jt::GamepadButtonCode::GBY)) {
+        auto snd = getGame()->audio().addTemporarySound("event:/menu-select");
+        snd->play();
         if (m_playerType == PlayerType::Arachno) {
             m_playerType = PlayerType::Arachnono;
 
@@ -233,7 +237,6 @@ void StateMenu::onUpdate(float const elapsed)
             twaIn->setStartDelay(0.2f);
             twaIn->setSkipTicks();
             add(twaIn);
-
         } else if (m_playerType == PlayerType::Arachnono) {
             m_playerType = PlayerType::Arachno;
 
