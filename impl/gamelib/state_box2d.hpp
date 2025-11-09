@@ -31,10 +31,12 @@ private:
 
     std::array<std::shared_ptr<SpiderString>, 4> m_activeStrings {};
     std::array<std::shared_ptr<jt::Box2DObject>, 4> m_tempStringAnchors {};
+    std::array<std::shared_ptr<jt::ParticleSystem<jt::Shape, 100>>, 4> m_stringParticleSystems {};
 
     bool m_ending { false };
 
     std::string getName() const override;
+    jt::Color getStringColor(int stringIndex);
     void shootString(int stringIndex, jt::Vector2f direction);
 
     void onCreate() override;
@@ -48,6 +50,7 @@ private:
     void endGame();
     void createPlayerWalkParticles();
     void createPlayerJumpParticleSystem();
+    std::shared_ptr<jt::ParticleSystem<jt::Shape, 100>> createStringParticles(int index);
 };
 
 #endif // DEMO_STATE_PLATFORMER_HPP

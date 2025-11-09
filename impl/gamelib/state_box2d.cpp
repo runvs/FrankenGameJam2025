@@ -1,10 +1,15 @@
 ﻿#include "state_box2d.hpp"
 
+#include "color/color_factory.hpp"
 #include "contact_callback_player_enemy.hpp"
 #include "contact_callback_player_ground.hpp"
 #include "conversions.hpp"
+#include "drawable_helpers.hpp"
 #include "game_properties.hpp"
+#include "lerp.hpp"
 #include "state_menu.hpp"
+#include "tweens/tween_color.hpp"
+#include "tweens/tween_scale.hpp"
 #include <box2dwrapper/box2d_contact_manager.hpp>
 #include <box2dwrapper/box2d_world_impl.hpp>
 #include <box2dwrapper/logging_box2d_contact_manager.hpp>
@@ -53,6 +58,46 @@ private:
     float m_distanceToBestHit;
 };
 
+std::shared_ptr<jt::ParticleSystem<jt::Shape, 100>> StatePlatformer::createStringParticles(
+    int index)
+{
+    auto color = getStringColor(index);
+    auto particles = jt::ParticleSystem<jt::Shape, 100>::createPS(
+        [this, color]() {
+            auto s = jt::dh::createShapeCircle(2, color, textureManager());
+            s->setOrigin(jt::Vector2f { 0, 0 });
+            s->setScale(jt::Vector2f { 0.5f, 0.5f });
+            return s;
+        },
+        [this](auto& s, auto pos) {
+            auto totalTime = 1;
+            auto const ageFn = [](float t) {
+                t = std::clamp(t, 0.0f, 1.0f);
+                return t > 0.999 ? 1.0f : 1.0f - pow(2.0f, -5.0f * t);
+            };
+
+            s->setPosition(jt::Random::getRandomPointIn(jt::Rectf { 0, 0, 100, 300 }));
+
+            auto twa = jt::TweenAlpha::create(s, totalTime, 255, 0);
+            twa->setAgePercentConversion(ageFn);
+            add(twa);
+
+            auto tws = jt::TweenScale::create(
+                s, totalTime, jt::Vector2f { 1.0, 1.0 }, jt::Vector2f { 0, 0 });
+            tws->setAgePercentConversion(ageFn);
+            add(tws);
+
+            auto const maxVariance = 20.0f;
+            auto const startPos = pos;
+            auto const endPos = pos + jt::Random::getRandomPointInCircle(maxVariance);
+            auto twp = jt::TweenPosition::create(s, totalTime, startPos, endPos);
+            twp->setAgePercentConversion(ageFn);
+            add(twp);
+        });
+    add(particles);
+    return particles;
+}
+
 void StatePlatformer::onCreate()
 {
     auto contactManager = std::make_shared<jt::Box2DContactManager>();
@@ -82,7 +127,10 @@ void StatePlatformer::onCreate()
 
     setAutoDraw(false);
 
-    shootString(0, { 0.0, -1.0 });
+    auto rng = std::default_random_engine {};
+    for (int i = 0; i < m_stringParticleSystems.size(); i++) {
+        m_stringParticleSystems[i] = createStringParticles(i);
+    }
 }
 
 void StatePlatformer::onEnter() { }
@@ -95,10 +143,8 @@ void StatePlatformer::loadLevel()
 
 void StatePlatformer::onUpdate(float const elapsed)
 {
-    for (auto m_active_string : m_activeStrings) {
-        if (m_active_string != nullptr && m_active_string->isAlive()) {
-            m_active_string->update(elapsed);
-        }
+    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::Space)) {
+        shootString(0, { 0.0, -1.0 });
     }
 
     if (!m_ending && !getGame()->stateManager().getTransition()->isInProgress()) {
@@ -192,7 +238,9 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
 void StatePlatformer::onDraw() const
 {
     m_player->drawRopeTarget(renderTarget());
-
+    for (auto particle_system : m_stringParticleSystems) {
+        particle_system->draw();
+    }
     m_level->draw();
 
     m_player->draw();
@@ -311,6 +359,22 @@ void StatePlatformer::createPlayerWalkParticles()
 
 std::string StatePlatformer::getName() const { return "Box2D"; }
 
+jt::Color StatePlatformer::getStringColor(int stringIndex)
+{
+    if (stringIndex == 0) {
+        return jt::Color { 16, 185, 16, 255 };
+    }
+    if (stringIndex == 1) {
+        return jt::Color { 230, 41, 55, 255 };
+    }
+    if (stringIndex == 2) {
+        return jt::Color { 0, 122, 204, 255 };
+    }
+    if (stringIndex == 3) {
+        return jt::Color { 255, 211, 0, 255 };
+    }
+}
+
 void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
 {
     // std::cout << direction.x << "|" << direction.y << std::endl;
@@ -337,23 +401,14 @@ void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
 
     m_tempStringAnchors[stringIndex] = std::make_shared<jt::Box2DObject>(m_world, &target);
 
-    // TODO: Fancily shoot string outwards
     existingString = std::make_shared<SpiderString>(
         m_world, m_player->getB2Body(), m_tempStringAnchors[stringIndex]->getB2Body());
     add(existingString);
-    jt::Color c;
-
-    if (stringIndex == 0) {
-        c = jt::Color { 16, 185, 16, 255 };
-    } else if (stringIndex == 1) {
-        c = jt::Color { 230, 41, 55, 255 };
-    } else if (stringIndex == 2) {
-        c = jt::Color { 0, 122, 204, 255 };
-    } else if (stringIndex == 3) {
-        c = jt::Color { 255, 211, 0, 255 };
-    }
+    jt::Color const c = getStringColor(stringIndex);
     existingString->withTargetCircle();
     existingString->setStringColor(c);
 
     m_activeStrings[stringIndex] = existingString;
+
+    m_stringParticleSystems[stringIndex]->fire(50, jt::Conversion::vec(cb.hitPoint));
 }
