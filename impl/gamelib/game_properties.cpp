@@ -54,4 +54,4 @@ float GP::PhysicsInitialRopeLengthFraction(float ropeLengthInPixel)
     return v;
 }
 
-float GP::PhysicsStringMaxLengthInPx() { return 350.0f; }
+float GP::PhysicsStringMaxLengthInPx() { return 300.0f; }

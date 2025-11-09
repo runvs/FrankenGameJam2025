@@ -189,6 +189,8 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
 
 void StatePlatformer::onDraw() const
 {
+    m_player->drawRopeTarget(renderTarget());
+
     m_level->draw();
 
     m_player->draw();

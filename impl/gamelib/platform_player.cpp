@@ -1,4 +1,6 @@
 #include "platform_player.hpp"
+
+#include "game_properties.hpp"
 #include <game_interface.hpp>
 #include <math_helper.hpp>
 #include <user_data_entries.hpp>
@@ -38,6 +40,9 @@ void Player::doCreate()
 
     m_crosshairH = std::make_shared<jt::Line>(jt::Vector2f { 16.0f, 0.0f });
     m_crosshairV = std::make_shared<jt::Line>(jt::Vector2f { 0.0f, 16.0f });
+
+    m_targetLine = std::make_shared<jt::Line>(jt::Vector2f { 0.0f, 0.0f });
+    m_targetLine->setColor(jt::Color { 255, 255, 255, 100 });
 }
 
 std::shared_ptr<jt::Animation> Player::getAnimation() { return m_animation; }
@@ -53,6 +58,12 @@ void Player::doUpdate(float const elapsed)
 
     m_crosshairH->update(elapsed);
     m_crosshairV->update(elapsed);
+
+    jt::Vector2f dir = m_gpAxis;
+    jt::MathHelper::normalizeMe(dir);
+    m_targetLine->setLineVector(GP::PhysicsStringMaxLengthInPx() * dir);
+    m_targetLine->setPosition(getPosition());
+    m_targetLine->update(elapsed);
 }
 
 void Player::clampPositionToLevelSize(jt::Vector2f& currentPosition) const
@@ -123,6 +134,11 @@ void Player::setLevelSize(jt::Vector2f const& levelSizeInTiles)
 void Player::setStringFireCallback(std::function<void(int, jt::Vector2f const&)> const& callback)
 {
     m_fireStringCallback = callback;
+}
+
+void Player::drawRopeTarget(std::shared_ptr<jt::RenderTargetInterface> targetContainer)
+{
+    m_targetLine->draw(targetContainer);
 }
 
 bool Player::canJump() const { return false; }

@@ -32,11 +32,15 @@ public:
     void setLevelSize(jt::Vector2f const& levelSizeInTiles);
     void setStringFireCallback(std::function<void(int, jt::Vector2f const&)> const& callback);
 
+    void drawRopeTarget(std::shared_ptr<jt::RenderTargetInterface> targetContainer);
+
 private:
     std::shared_ptr<jt::Animation> m_animation;
     std::shared_ptr<jt::Box2DObject> m_physicsObject;
     std::shared_ptr<jt::Line> m_crosshairV;
     std::shared_ptr<jt::Line> m_crosshairH;
+
+    std::shared_ptr<jt::Line> m_targetLine;
 
     jt::Vector2f m_levelSizeInTiles { 0.0f, 0.0f };
 
