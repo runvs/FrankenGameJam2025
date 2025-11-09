@@ -1,10 +1,13 @@
 #include "platform_player.hpp"
+
+#include "game_properties.hpp"
 #include <game_interface.hpp>
 #include <math_helper.hpp>
 #include <user_data_entries.hpp>
 
-Player::Player(std::shared_ptr<jt::Box2DWorldInterface> world)
+Player::Player(PlayerType pt, std::shared_ptr<jt::Box2DWorldInterface> world)
 {
+    m_playerType = pt;
     b2BodyDef bodyDef;
     bodyDef.fixedRotation = true;
     bodyDef.type = b2_dynamicBody;
@@ -16,15 +19,20 @@ void Player::doCreate()
 {
     m_animation = std::make_shared<jt::Animation>();
 
-    m_animation->loadFromJson("assets/hero_8x8.json", textureManager());
-    m_animation->play("right");
+    if (m_playerType == PlayerType::Arachno) {
+        m_animation->loadFromAseprite("assets/arachno.aseprite", textureManager());
+        m_animation->play("idle");
+    } else {
+        m_animation->loadFromAseprite("assets/arachnono.aseprite", textureManager());
+        m_animation->play("idle");
+    }
     m_animation->setOffset(jt::OffsetMode::CENTER);
 
     b2FixtureDef fixtureDef;
     fixtureDef.density = 1.0f;
     fixtureDef.friction = 0.5f;
     b2CircleShape circleCollider {};
-    circleCollider.m_radius = 4.0f;
+    circleCollider.m_radius = 8.0f;
     fixtureDef.shape = &circleCollider;
     auto playerCollider = m_physicsObject->getB2Body()->CreateFixture(&fixtureDef);
     playerCollider->SetUserData((void*)g_userDataPlayerID);
@@ -38,6 +46,9 @@ void Player::doCreate()
 
     m_crosshairH = std::make_shared<jt::Line>(jt::Vector2f { 16.0f, 0.0f });
     m_crosshairV = std::make_shared<jt::Line>(jt::Vector2f { 0.0f, 16.0f });
+
+    m_targetLine = std::make_shared<jt::Line>(jt::Vector2f { 0.0f, 0.0f });
+    m_targetLine->setColor(jt::Color { 255, 255, 255, 100 });
 }
 
 std::shared_ptr<jt::Animation> Player::getAnimation() { return m_animation; }
@@ -51,24 +62,14 @@ void Player::doUpdate(float const elapsed)
     updateAnimation(elapsed);
     handleMovement(elapsed);
 
-    if (m_isTouchingGround != m_wasTouchingGroundLastFrame) {
-        auto count = 25;
-        if (m_wasTouchingGroundLastFrame) {
-            count = 10;
-        }
-        auto ps = m_postJumpParticles.lock();
-        if (ps) {
-            ps->fire(count, currentPosition + jt::Vector2f { 0.0f, 5.0f });
-        }
-    }
-    m_wasTouchingGroundLastFrame = m_isTouchingGround;
-
-    m_lastTouchedGroundTimer -= elapsed;
-    m_lastJumpTimer -= elapsed;
-    m_wantsToJumpTimer -= elapsed;
-
     m_crosshairH->update(elapsed);
     m_crosshairV->update(elapsed);
+
+    jt::Vector2f dir = m_gpAxis;
+    jt::MathHelper::normalizeMe(dir);
+    m_targetLine->setLineVector(GP::PhysicsStringMaxLengthInPx() * dir);
+    m_targetLine->setPosition(getPosition());
+    m_targetLine->update(elapsed);
 }
 
 void Player::clampPositionToLevelSize(jt::Vector2f& currentPosition) const
@@ -81,63 +82,22 @@ void Player::clampPositionToLevelSize(jt::Vector2f& currentPosition) const
     }
 }
 
-void Player::updateAnimation(float elapsed)
+void Player::updateAnimation(float elapsed) { m_animation->update(elapsed); }
+
+void Player::handleMovement(float const /*elapsed*/)
 {
-    if (m_physicsObject->getVelocity().x > 0) {
-        m_animation->play("right");
-        m_isMoving = true;
-    } else if (m_physicsObject->getVelocity().x < 0) {
-        m_animation->play("left");
-        m_isMoving = true;
-    } else {
-        m_isMoving = false;
-    }
-    auto const v = m_horizontalMovement ? abs(m_physicsObject->getVelocity().x) / 90.0f : 0.0f;
-    m_animation->setAnimationSpeedFactor(v);
-    m_animation->update(elapsed);
-
-    m_walkParticlesTimer -= elapsed * v;
-    if (m_walkParticlesTimer <= 0) {
-        m_walkParticlesTimer = 0.15f;
-        if (m_isMoving && m_isTouchingGround) {
-            auto ps = m_walkParticles.lock();
-            if (ps) {
-                ps->fire(1, getPosition());
-            }
-        }
-    }
-}
-
-void Player::handleMovement(float const elapsed)
-{
-    auto const maxHorizontalVelocity = 90.0f;
-    auto const horizontalDampening = 130.0f;
-
-    auto const jumpInitialVelocity = -140.0f;
-    auto const maxVerticalVelocity = 100.0f;
-    auto const jumpVerticalAcceleration = -9500.0f;
-
-    auto const jumpDeadTime = 0.3f;
-    auto const preLandJumpTimeFrame = 0.1f;
-
-    auto b2b = getB2Body();
-    m_horizontalMovement = false;
-
-    auto v = m_physicsObject->getVelocity();
-    auto const kb = getGame()->input().keyboard().get();
     auto gp = getGame()->input().gamepad(0).get();
 
     jt::Vector2f gpAxis = gp->getAxis(jt::GamepadAxisCode::ALeft);
 
-    if (jt::MathHelper::lengthSquared(gpAxis) > 0.125f) {
+    if (jt::MathHelper::lengthSquared(gpAxis) > 0.005f) {
         jt::MathHelper::normalizeMe(gpAxis);
-
-        m_crosshairPos = getPosition();
-        m_crosshairPos += 48.0f * gpAxis;
-
-        m_crosshairH->setPosition(m_crosshairPos - jt::Vector2f { 8.0f, 0.0f });
-        m_crosshairV->setPosition(m_crosshairPos - jt::Vector2f { 0.0f, 8.0f });
+        m_gpAxis = 48.0f * gpAxis;
     }
+    m_crosshairPos = getPosition() + m_gpAxis;
+    m_crosshairH->setPosition(m_crosshairPos - jt::Vector2f { 8.0f, 0.0f });
+
+    m_crosshairV->setPosition(m_crosshairPos - jt::Vector2f { 0.0f, 8.0f });
 
     if (m_fireStringCallback) {
         if (gp->justPressed(jt::GamepadButtonCode::GBA)) {
@@ -150,40 +110,6 @@ void Player::handleMovement(float const elapsed)
             m_fireStringCallback(3, gpAxis);
         }
     }
-
-    if (m_wantsToJumpTimer >= 0.0f) {
-        if (canJump()) {
-
-            m_lastJumpTimer = jumpDeadTime;
-            v.y = jumpInitialVelocity;
-        }
-    }
-    if (v.y >= maxVerticalVelocity) {
-        v.y = maxVerticalVelocity;
-    }
-    // clamp horizontal Velocity
-    if (v.x >= maxHorizontalVelocity) {
-        v.x = maxHorizontalVelocity;
-    } else if (v.x <= -maxHorizontalVelocity) {
-        v.x = -maxHorizontalVelocity;
-    }
-
-    // damp horizontal movement
-    if (!m_horizontalMovement) {
-        if (v.x > 0) {
-            v.x -= horizontalDampening * elapsed;
-            if (v.x < 0) {
-                v.x = 0;
-            }
-        } else if (v.x < 0) {
-            v.x += horizontalDampening * elapsed;
-            if (v.x > 0) {
-                v.x = 0;
-            }
-        }
-    }
-
-    m_physicsObject->setVelocity(v);
 }
 
 b2Body* Player::getB2Body() { return m_physicsObject->getB2Body(); }
@@ -195,14 +121,7 @@ void Player::doDraw() const
     m_crosshairV->draw(renderTarget());
 }
 
-void Player::setTouchesGround(bool touchingGround)
-{
-    auto const m_postDropJumpTimeFrame = 0.2f;
-    m_isTouchingGround = touchingGround;
-    if (m_isTouchingGround) {
-        m_lastTouchedGroundTimer = m_postDropJumpTimeFrame;
-    }
-}
+void Player::setTouchesGround(bool /*touchingGround*/) { }
 
 jt::Vector2f Player::getPosOnScreen() const { return m_animation->getScreenPosition(); }
 
@@ -210,15 +129,9 @@ void Player::setPosition(jt::Vector2f const& pos) { m_physicsObject->setPosition
 
 jt::Vector2f Player::getPosition() const { return m_physicsObject->getPosition(); }
 
-void Player::setWalkParticleSystem(std::weak_ptr<jt::ParticleSystem<jt::Shape, 50>> ps)
-{
-    m_walkParticles = ps;
-}
+void Player::setWalkParticleSystem(std::weak_ptr<jt::ParticleSystem<jt::Shape, 50>> ps) { }
 
-void Player::setJumpParticleSystem(std::weak_ptr<jt::ParticleSystem<jt::Shape, 50>> ps)
-{
-    m_postJumpParticles = ps;
-}
+void Player::setJumpParticleSystem(std::weak_ptr<jt::ParticleSystem<jt::Shape, 50>> ps) { }
 
 void Player::setLevelSize(jt::Vector2f const& levelSizeInTiles)
 {
@@ -230,16 +143,9 @@ void Player::setStringFireCallback(std::function<void(int, jt::Vector2f const&)>
     m_fireStringCallback = callback;
 }
 
-bool Player::canJump() const
+void Player::drawRopeTarget(std::shared_ptr<jt::RenderTargetInterface> targetContainer)
 {
-    if (m_lastJumpTimer >= 0.0f) {
-        return false;
-    }
-    if (m_isTouchingGround) {
-        return true;
-    }
-    if (m_lastTouchedGroundTimer > 0) {
-        return true;
-    }
-    return false;
+    m_targetLine->draw(targetContainer);
 }
+
+bool Player::canJump() const { return false; }

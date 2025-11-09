@@ -2,6 +2,7 @@
 #define JAMTEMPLATE_DEMO_PLATFORM_PLAYER
 
 #include "line.hpp"
+#include "player_type.hpp"
 #include <animation.hpp>
 #include <box2dwrapper/box2d_object.hpp>
 #include <game_object.hpp>
@@ -13,7 +14,7 @@
 class Player : public jt::GameObject {
 public:
     using Sptr = std::shared_ptr<Player>;
-    Player(std::shared_ptr<jt::Box2DWorldInterface> world);
+    Player(PlayerType pt, std::shared_ptr<jt::Box2DWorldInterface> world);
 
     ~Player() = default;
 
@@ -32,38 +33,29 @@ public:
     void setLevelSize(jt::Vector2f const& levelSizeInTiles);
     void setStringFireCallback(std::function<void(int, jt::Vector2f const&)> const& callback);
 
+    void drawRopeTarget(std::shared_ptr<jt::RenderTargetInterface> targetContainer);
+
 private:
+    PlayerType m_playerType;
     std::shared_ptr<jt::Animation> m_animation;
     std::shared_ptr<jt::Box2DObject> m_physicsObject;
     std::shared_ptr<jt::Line> m_crosshairV;
     std::shared_ptr<jt::Line> m_crosshairH;
 
-    float m_walkParticlesTimer = 0.0f;
-    std::weak_ptr<jt::ParticleSystem<jt::Shape, 50>> m_walkParticles;
-    std::weak_ptr<jt::ParticleSystem<jt::Shape, 50>> m_postJumpParticles;
-
-    bool m_isTouchingGround { false };
-    bool m_wasTouchingGroundLastFrame { false };
-
-    bool m_isMoving { false };
+    std::shared_ptr<jt::Line> m_targetLine;
 
     jt::Vector2f m_levelSizeInTiles { 0.0f, 0.0f };
 
-    float m_lastTouchedGroundTimer { 0.0f };
-    float m_lastJumpTimer { 0.0f };
-
-    float m_wantsToJumpTimer { 0.0f };
-
     bool canJump() const;
     void doCreate() override;
-    void doUpdate(float const elapsed) override;
+    void doUpdate(float elapsed) override;
     void doDraw() const override;
 
-    void handleMovement(float const elapsed);
+    void handleMovement(float elapsed);
     void updateAnimation(float elapsed);
     void clampPositionToLevelSize(jt::Vector2f& currentPosition) const;
-    bool m_horizontalMovement { false };
     jt::Vector2f m_crosshairPos { 0.0f, 0.0f };
+    jt::Vector2f m_gpAxis { 0.0f, 0.0f };
 
     std::function<void(int, jt::Vector2f const&)> m_fireStringCallback { nullptr };
 };

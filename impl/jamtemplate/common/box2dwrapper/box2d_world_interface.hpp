@@ -15,10 +15,12 @@ namespace jt {
 /// Interface for box2World
 class Box2DWorldInterface {
 public:
+    virtual b2World* getWorld() = 0;
+
     /// Create a physics body
     /// \param definition the definition describing the body
     /// \return the created body
-    virtual b2Body* createBody(const b2BodyDef* definition) = 0;
+    virtual b2Body* createBody(b2BodyDef const* definition) = 0;
 
     /// Destroy a physics body
     /// \param body pointer to the body to be destroyed
@@ -27,7 +29,7 @@ public:
     /// Create a Box2D joint
     /// \param defintion The definition describing the joint
     /// \return The created joint
-    virtual b2Joint* createJoint(const b2JointDef* defintion) = 0;
+    virtual b2Joint* createJoint(b2JointDef const* defintion) = 0;
 
     /// Destory a Box2D joint
     /// \param joint Pointer to the joint to be destroyed
@@ -45,9 +47,9 @@ public:
 
     virtual ~Box2DWorldInterface() = default;
     // avoid slicing
-    Box2DWorldInterface(const Box2DWorldInterface&) = delete;
+    Box2DWorldInterface(Box2DWorldInterface const&) = delete;
     Box2DWorldInterface(Box2DWorldInterface&&) = delete;
-    Box2DWorldInterface& operator=(const Box2DWorldInterface&) = delete;
+    Box2DWorldInterface& operator=(Box2DWorldInterface const&) = delete;
     Box2DWorldInterface& operator=(Box2DWorldInterface&&) = delete;
 
 protected:

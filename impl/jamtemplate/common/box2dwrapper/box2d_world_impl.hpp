@@ -15,17 +15,18 @@ public:
     Box2DWorldImpl(jt::Vector2f const& gravity,
         std::shared_ptr<jt::Box2DContactManagerInterface> contactManager = nullptr);
 
-    b2Body* createBody(const b2BodyDef* definition) override;
+    b2Body* createBody(b2BodyDef const* definition) override;
 
     void destroyBody(b2Body* body) override;
 
-    b2Joint* createJoint(const b2JointDef* definition) override;
+    b2Joint* createJoint(b2JointDef const* definition) override;
 
     void destroyJoint(b2Joint* joint) override;
 
     Box2DContactCallbackRegistryInterface& getContactManager() override;
 
     void step(float elapsed, int velocityIterations, int positionIterations) override;
+    b2World* getWorld() override;
 
 private:
     std::unique_ptr<b2World> m_world { nullptr };
@@ -33,5 +34,6 @@ private:
 };
 
 } // namespace jt
+
 // namespace jt
 #endif // JAMTEMPLATE_BOX2D_WORLD_IMPL_HPP

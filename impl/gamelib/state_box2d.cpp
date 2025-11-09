@@ -1,5 +1,9 @@
 ﻿#include "state_box2d.hpp"
 
+#include "color/color_factory.hpp"
+#include "contact_callback_player_enemy.hpp"
+#include "contact_callback_player_ground.hpp"
+#include "conversions.hpp"
 #include "game_properties.hpp"
 #include "state_menu.hpp"
 #include <box2dwrapper/box2d_contact_manager.hpp>
@@ -15,7 +19,44 @@
 
 #include "SpiderString.h"
 
-StatePlatformer::StatePlatformer(std::string const& levelName) { m_levelName = levelName; }
+StatePlatformer::StatePlatformer(PlayerType pt, std::string const& levelName)
+{
+    m_playerType = pt;
+    m_levelName = levelName;
+}
+
+class FancyCallbackFixtureThingy : public b2RayCastCallback {
+public:
+    FancyCallbackFixtureThingy(b2Fixture* playerFixture)
+    {
+        hitSomething = false;
+        m_playerFixture = playerFixture;
+        m_distanceToBestHit = std::numeric_limits<float>::max();
+    }
+
+    float32 ReportFixture(
+        b2Fixture* fixture, b2Vec2 const& point, b2Vec2 const& normal, float32 fraction) override
+    {
+        if (fixture == m_playerFixture) {
+            return -1;
+        }
+
+        hitSomething = true;
+        if (fraction < m_distanceToBestHit) {
+            m_distanceToBestHit = fraction;
+            hitPoint = point;
+        }
+
+        return fraction;
+    }
+
+    b2Vec2 hitPoint;
+    bool hitSomething;
+
+private:
+    b2Fixture* m_playerFixture;
+    float m_distanceToBestHit;
+};
 
 void StatePlatformer::onCreate()
 {
@@ -23,21 +64,15 @@ void StatePlatformer::onCreate()
     auto loggingContactManager
         = std::make_shared<jt::LoggingBox2DContactManager>(contactManager, getGame()->logger());
     m_world = std::make_shared<jt::Box2DWorldImpl>(
-        jt::Vector2f { 0.0f, 400.0f }, loggingContactManager);
+        jt::Vector2f { 0.0f, GP::PhysicsGravityStrength() }, loggingContactManager);
 
+    m_background = std::make_shared<jt::Shape>();
+    m_background->makeRect(GP::GetScreenSize(), textureManager());
+    m_background->setColor(jt::ColorFactory::fromHexString("#203835"));
+    m_background->setCamMovementFactor(0.0f);
     loadLevel();
 
     CreatePlayer();
-
-    b2BodyDef bodyDef;
-    bodyDef.fixedRotation = true;
-    bodyDef.position = {50.0, 50.0};
-    bodyDef.type = b2_kinematicBody;
-
-    m_anchor = std::make_shared<jt::Box2DObject>(m_world, &bodyDef);
-
-    m_string1 = std::make_shared<SpiderString>(
-        m_world, m_player->getB2Body(), m_anchor->getB2Body());
 
     auto playerGroundContactListener = std::make_shared<ContactCallbackPlayerGround>();
     playerGroundContactListener->setPlayer(m_player);
@@ -52,9 +87,11 @@ void StatePlatformer::onCreate()
 
     m_scanlines = std::make_shared<jt::ScanLines>(
         jt::Vector2f { GP::GetScreenSize().x, GP::GetScreenSize().y / 256 }, 256);
-    add(m_scanlines);
+    // add(m_scanlines);
 
     setAutoDraw(false);
+
+    shootString(0, { 0.0, -1.0 });
 }
 
 void StatePlatformer::onEnter() { }
@@ -67,7 +104,13 @@ void StatePlatformer::loadLevel()
 
 void StatePlatformer::onUpdate(float const elapsed)
 {
-    m_string1->update();
+    m_background->update(elapsed);
+    for (auto m_active_string : m_activeStrings) {
+        if (m_active_string != nullptr && m_active_string->isAlive()) {
+            m_active_string->update(elapsed);
+        }
+    }
+
     if (!m_ending && !getGame()->stateManager().getTransition()->isInProgress()) {
         std::int32_t const velocityIterations = 20;
         std::int32_t const positionIterations = 20;
@@ -82,7 +125,7 @@ void StatePlatformer::onUpdate(float const elapsed)
                 if (!m_ending) {
                     m_ending = true;
                     getGame()->stateManager().switchState(
-                        std::make_shared<StatePlatformer>(newLevelName));
+                        std::make_shared<StatePlatformer>(m_playerType, newLevelName));
                 }
             });
 
@@ -94,29 +137,30 @@ void StatePlatformer::onUpdate(float const elapsed)
         getGame()->stateManager().switchState(std::make_shared<StateMenu>());
     }
 
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F2)) {
-        getGame()->stateManager().switchState(
-            std::make_shared<StatePlatformer>("platformer_0_2.json"));
-    }
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F3)) {
-        getGame()->stateManager().switchState(
-            std::make_shared<StatePlatformer>("platformer_0_3.json"));
-    }
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F5)) {
-        getGame()->stateManager().switchState(
-            std::make_shared<StatePlatformer>("platformer_0_5.json"));
-    }
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F6)) {
-        getGame()->stateManager().switchState(
-            std::make_shared<StatePlatformer>("platformer_0_6.json"));
-    }
+    // if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F2)) {
+    //     getGame()->stateManager().switchState(
+    //         std::make_shared<StatePlatformer>("platformer_0_2.json"));
+    // }
+    // if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F3)) {
+    //     getGame()->stateManager().switchState(
+    //         std::make_shared<StatePlatformer>("platformer_0_3.json"));
+    // }
+    // if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F5)) {
+    //     getGame()->stateManager().switchState(
+    //         std::make_shared<StatePlatformer>("platformer_0_5.json"));
+    // }
+    // if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F6)) {
+    //     getGame()->stateManager().switchState(
+    //         std::make_shared<StatePlatformer>("platformer_0_6.json"));
+    // }
 }
 
 void StatePlatformer::endGame()
 {
     if (!m_ending) {
         m_ending = true;
-        getGame()->stateManager().switchState(std::make_shared<StatePlatformer>(m_levelName));
+        getGame()->stateManager().switchState(
+            std::make_shared<StatePlatformer>(m_playerType, m_levelName));
     }
 }
 
@@ -130,16 +174,23 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
     float const scrollSpeed = 60.0f;
     auto& cam = getGame()->gfx().camera();
 
-    auto const screenWidth = 0.5f * 1024.0f;
+    auto const screenWidth = GP::GetScreenSize().x;
+
     if (ps.x < leftMargin) {
         cam.move(jt::Vector2f { -scrollSpeed * elapsed, 0.0f });
         if (ps.x < rightMargin / 2) {
             cam.move(jt::Vector2f { -scrollSpeed * elapsed, 0.0f });
+            if (ps.x < 0.0) {
+                cam.move(jt::Vector2f { -scrollSpeed * elapsed, 0.0f });
+            }
         }
     } else if (ps.x > screenWidth - rightMargin) {
         cam.move(jt::Vector2f { scrollSpeed * elapsed, 0.0f });
         if (ps.x > screenWidth - rightMargin / 3 * 2) {
             cam.move(jt::Vector2f { scrollSpeed * elapsed, 0.0f });
+            if (ps.x > screenWidth) {
+                cam.move(jt::Vector2f { scrollSpeed * elapsed, 0.0f });
+            }
         }
     }
 
@@ -150,6 +201,8 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
     }
     auto const levelWidth = m_level->getLevelSizeInPixel().x;
     auto const maxCamPosition = levelWidth - screenWidth;
+    // std::cout << ps.x << " " << screenWidth << " " << levelWidth << " " << maxCamPosition
+    //           << std::endl;
     if (offset.x > maxCamPosition) {
         offset.x = maxCamPosition;
     }
@@ -158,21 +211,33 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
 
 void StatePlatformer::onDraw() const
 {
+    m_background->draw(renderTarget());
+    m_player->drawRopeTarget(renderTarget());
+
     m_level->draw();
 
     m_player->draw();
     m_walkParticles->draw();
     m_playerJumpParticles->draw();
-    m_scanlines->draw();
+    // m_scanlines->draw();
     m_vignette->draw();
+
+    for (auto m_active_string : m_activeStrings) {
+        if (m_active_string != nullptr && m_active_string->isAlive()) {
+            m_active_string->draw();
+        }
+    }
 }
 
 void StatePlatformer::CreatePlayer()
 {
-    m_player = std::make_shared<Player>(m_world);
+    m_player = std::make_shared<Player>(m_playerType, m_world);
     m_player->setPosition(m_level->getPlayerStart());
     m_player->setLevelSize(m_level->getLevelSizeInPixel());
     add(m_player);
+
+    m_player->setStringFireCallback(
+        [this](int const index, jt::Vector2f const& dir) { shootString(index, dir); });
 
     createPlayerWalkParticles();
     createPlayerJumpParticleSystem();
@@ -266,3 +331,50 @@ void StatePlatformer::createPlayerWalkParticles()
 }
 
 std::string StatePlatformer::getName() const { return "Box2D"; }
+
+void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
+{
+    // std::cout << direction.x << "|" << direction.y << std::endl;
+    auto& existingString = m_activeStrings[stringIndex];
+
+    if (existingString != nullptr && existingString->isAlive()) {
+        existingString.reset();
+        m_tempStringAnchors[stringIndex].reset();
+    }
+
+    auto cb = FancyCallbackFixtureThingy { &m_player->getB2Body()->GetFixtureList()[0] };
+    m_world->getWorld()->RayCast(&cb, m_player->getB2Body()->GetPosition(),
+        m_player->getB2Body()->GetPosition()
+            + jt::Conversion::vec(GP::PhysicsStringMaxLengthInPx() * direction));
+
+    if (!cb.hitSomething) {
+        return;
+    }
+
+    b2BodyDef target;
+    target.fixedRotation = true;
+    target.position = cb.hitPoint;
+    target.type = b2_kinematicBody;
+
+    m_tempStringAnchors[stringIndex] = std::make_shared<jt::Box2DObject>(m_world, &target);
+
+    // TODO: Fancily shoot string outwards
+    existingString = std::make_shared<SpiderString>(
+        m_world, m_player->getB2Body(), m_tempStringAnchors[stringIndex]->getB2Body());
+    add(existingString);
+    jt::Color c;
+
+    if (stringIndex == 0) {
+        c = jt::Color { 16, 185, 16, 255 };
+    } else if (stringIndex == 1) {
+        c = jt::Color { 230, 41, 55, 255 };
+    } else if (stringIndex == 2) {
+        c = jt::Color { 0, 122, 204, 255 };
+    } else if (stringIndex == 3) {
+        c = jt::Color { 255, 211, 0, 255 };
+    }
+    existingString->withTargetCircle();
+    existingString->setStringColor(c);
+
+    m_activeStrings[stringIndex] = existingString;
+}

@@ -1,6 +1,7 @@
 ﻿#ifndef GAME_STATE_MENU_HPP
 #define GAME_STATE_MENU_HPP
 
+#include "player_type.hpp"
 #include "screeneffects/scanlines.hpp"
 #include <game_state.hpp>
 
@@ -29,6 +30,8 @@ private:
     std::shared_ptr<jt::Text> m_textCredits;
     std::shared_ptr<jt::Text> m_textVersion;
 
+    std::shared_ptr<jt::Animation> m_arachno;
+    std::shared_ptr<jt::Animation> m_arachnono;
     std::shared_ptr<jt::Shape> m_overlay;
     std::shared_ptr<jt::Vignette> m_vignette;
     std::shared_ptr<jt::ScanLines> m_scanlines { nullptr };
@@ -36,6 +39,8 @@ private:
     int m_score { 0 };
 
     bool m_started { false };
+
+    PlayerType m_playerType { PlayerType::Arachno };
 
     void onCreate() override;
     void onEnter() override;

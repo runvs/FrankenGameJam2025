@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
-set(PROJECTNAME "FrankenGameJam2025")
+set(PROJECTNAME "ArachnoSwing")
 project(${PROJECTNAME})
 
 ### Enable CCache

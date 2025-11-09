@@ -107,7 +107,7 @@ void Level::loadMovingPlatforms(jt::tilemap::TilesonLoader& loader)
 void Level::loadLevelSize(jt::tilemap::TilesonLoader const& loader)
 {
     auto const sizeInTiles = loader.getMapSizeInTiles();
-    m_levelSizeInPixel = jt::Vector2f { 8.0f * sizeInTiles.x, 8.0f * sizeInTiles.y };
+    m_levelSizeInPixel = jt::Vector2f { 16.0f * sizeInTiles.x, 16.0f * sizeInTiles.y };
 }
 
 void Level::loadLevelKillboxes(jt::tilemap::TilesonLoader& loader)
@@ -131,7 +131,7 @@ void Level::loadLevelCollisions(jt::tilemap::TilesonLoader& loader)
 {
     auto tileCollisions = loader.loadCollisionsFromLayer("ground");
 
-    tileCollisions.refineColliders(8);
+    tileCollisions.refineColliders(16);
     for (auto const& r : tileCollisions.getRects()) {
         b2BodyDef bodyDef;
         bodyDef.fixedRotation = true;
@@ -197,7 +197,7 @@ void Level::doUpdate(float const elapsed)
 
 void Level::doDraw() const
 {
-    m_background->draw(renderTarget());
+    // m_background->draw(renderTarget());
     m_tileLayerGround->draw(renderTarget());
     for (auto const& exit : m_exits) {
         exit.draw();

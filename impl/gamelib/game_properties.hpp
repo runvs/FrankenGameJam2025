@@ -4,21 +4,22 @@
 #include <color/color.hpp>
 #include <color/palette.hpp>
 #include <vector.hpp>
+#include <Box2D/Common/b2Settings.h>
 #include <string>
 
 class GP {
 public:
     GP() = delete;
 
-    static std::string GameName() { return "MoonRunner"; }
+    static std::string GameName() { return "ArachnoSwing"; }
 
-    static std::string AuthorName() { return "Laguna_999"; }
+    static std::string AuthorName() { return "Adkiem, BloodyOrange, Jacudibu, Laguna_999"; }
 
     static std::string JamName() { return ""; }
 
-    static std::string JamDate() { return "Games& Festival 2025"; }
+    static std::string JamDate() { return "FrankenGameJam 2025"; }
 
-    static std::string ExplanationText() { return "[W,D] to move \n[W] to jump"; }
+    static std::string ExplanationText() { return "[A] to start\n[Y] to switch chars"; }
 
     static jt::Vector2f GetWindowSize() { return jt::Vector2f { 1024, 768 }; }
 
@@ -41,6 +42,11 @@ public:
     static int PhysicVelocityIterations();
     static int PhysicPositionIterations();
     static jt::Vector2f PlayerSize();
+    static float PhysicsGravityStrength();
+    static float PhysicsStringFrequency();
+    static float PhysicsStringDampingRatio();
+    static float PhysicsInitialRopeLengthFraction(float ropeLengthInPixel);
+    static float PhysicsStringMaxLengthInPx();
 };
 
 #endif
