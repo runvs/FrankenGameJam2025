@@ -27,13 +27,13 @@ void StateMenu::onCreate()
     m_arachno->loadFromAseprite("assets/arachno.aseprite", textureManager());
     m_arachno->play("idle");
     m_arachno->setOffset(jt::OffsetMode::CENTER);
-    m_arachno->setPosition({ 100.0f, 100.0f });
+    m_arachno->setPosition({ 32.0f, 150.0f });
 
     m_arachnono = std::make_shared<jt::Animation>();
     m_arachnono->loadFromAseprite("assets/arachnono.aseprite", textureManager());
     m_arachnono->play("idle");
     m_arachnono->setOffset(jt::OffsetMode::CENTER);
-    m_arachnono->setPosition({ 100.0f, 200.0f });
+    m_arachnono->setPosition({ 32.0f, 200.0f });
 
     add(std::make_shared<jt::LicenseInfo>());
 
@@ -72,8 +72,7 @@ void StateMenu::createVignette()
 
 void StateMenu::createShapes()
 {
-    m_background
-        = jt::dh::createShapeRect(GP::GetScreenSize(), GP::PaletteBackground(), textureManager());
+    m_background = std::make_shared<jt::Sprite>("assets/bg.png", textureManager());
     m_overlay = jt::dh::createShapeRect(GP::GetScreenSize(), jt::colors::Black, textureManager());
 }
 

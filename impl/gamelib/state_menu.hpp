@@ -22,7 +22,7 @@ public:
     void setScore(int s) { m_score = s; };
 
 private:
-    std::shared_ptr<jt::Shape> m_background;
+    std::shared_ptr<jt::Sprite> m_background;
 
     std::shared_ptr<jt::Text> m_textTitle;
     std::shared_ptr<jt::Text> m_textStart;
