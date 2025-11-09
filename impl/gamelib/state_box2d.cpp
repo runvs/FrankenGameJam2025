@@ -1,5 +1,6 @@
 ﻿#include "state_box2d.hpp"
 
+#include "color/color_factory.hpp"
 #include "contact_callback_player_enemy.hpp"
 #include "contact_callback_player_ground.hpp"
 #include "conversions.hpp"
@@ -61,6 +62,10 @@ void StatePlatformer::onCreate()
     m_world = std::make_shared<jt::Box2DWorldImpl>(
         jt::Vector2f { 0.0f, GP::PhysicsGravityStrength() }, loggingContactManager);
 
+    m_background = std::make_shared<jt::Shape>();
+    m_background->makeRect(GP::GetScreenSize(), textureManager());
+    m_background->setColor(jt::ColorFactory::fromHexString("#203835"));
+    m_background->setCamMovementFactor(0.0f);
     loadLevel();
 
     CreatePlayer();
@@ -93,6 +98,7 @@ void StatePlatformer::loadLevel()
 
 void StatePlatformer::onUpdate(float const elapsed)
 {
+    m_background->update(elapsed);
     for (auto m_active_string : m_activeStrings) {
         if (m_active_string != nullptr && m_active_string->isAlive()) {
             m_active_string->update(elapsed);
@@ -161,16 +167,23 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
     float const scrollSpeed = 60.0f;
     auto& cam = getGame()->gfx().camera();
 
-    auto const screenWidth = 0.5f * 1024.0f;
+    auto const screenWidth = GP::GetScreenSize().x;
+
     if (ps.x < leftMargin) {
         cam.move(jt::Vector2f { -scrollSpeed * elapsed, 0.0f });
         if (ps.x < rightMargin / 2) {
             cam.move(jt::Vector2f { -scrollSpeed * elapsed, 0.0f });
+            if (ps.x < 0.0) {
+                cam.move(jt::Vector2f { -scrollSpeed * elapsed, 0.0f });
+            }
         }
     } else if (ps.x > screenWidth - rightMargin) {
         cam.move(jt::Vector2f { scrollSpeed * elapsed, 0.0f });
         if (ps.x > screenWidth - rightMargin / 3 * 2) {
             cam.move(jt::Vector2f { scrollSpeed * elapsed, 0.0f });
+            if (ps.x > screenWidth) {
+                cam.move(jt::Vector2f { scrollSpeed * elapsed, 0.0f });
+            }
         }
     }
 
@@ -181,6 +194,8 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
     }
     auto const levelWidth = m_level->getLevelSizeInPixel().x;
     auto const maxCamPosition = levelWidth - screenWidth;
+    // std::cout << ps.x << " " << screenWidth << " " << levelWidth << " " << maxCamPosition
+    //           << std::endl;
     if (offset.x > maxCamPosition) {
         offset.x = maxCamPosition;
     }
@@ -189,6 +204,7 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
 
 void StatePlatformer::onDraw() const
 {
+    m_background->draw(renderTarget());
     m_player->drawRopeTarget(renderTarget());
 
     m_level->draw();

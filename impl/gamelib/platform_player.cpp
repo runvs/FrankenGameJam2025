@@ -90,6 +90,7 @@ void Player::handleMovement(float const /*elapsed*/)
     }
     m_crosshairPos = getPosition() + m_gpAxis;
     m_crosshairH->setPosition(m_crosshairPos - jt::Vector2f { 8.0f, 0.0f });
+
     m_crosshairV->setPosition(m_crosshairPos - jt::Vector2f { 0.0f, 8.0f });
 
     if (m_fireStringCallback) {

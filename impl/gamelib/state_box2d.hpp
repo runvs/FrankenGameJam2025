@@ -21,6 +21,7 @@ private:
     std::shared_ptr<jt::Box2DWorldInterface> m_world { nullptr };
 
     std::string m_levelName { "" };
+    std::shared_ptr<jt::Shape> m_background { nullptr };
     std::shared_ptr<Level> m_level { nullptr };
     std::shared_ptr<Player> m_player { nullptr };
     std::shared_ptr<jt::Vignette> m_vignette { nullptr };
