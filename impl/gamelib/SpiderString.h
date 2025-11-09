@@ -15,12 +15,12 @@ public:
     void doUpdate(float elapsed) override;
     void doDraw() const override;
 
-    void withDebugCircle();
+    void withTargetCircle();
     void setStringColor(jt::Color const& c);
 
 private:
     std::shared_ptr<jt::Line> m_line;
-    std::shared_ptr<jt::Shape> m_debugCircle;
+    std::shared_ptr<jt::Shape> m_targetCircle;
 };
 
 #endif // FRANKENGAMEJAM2025_SPIDERSTRING_H
