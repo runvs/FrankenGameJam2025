@@ -101,13 +101,13 @@ void Player::handleMovement(float const /*elapsed*/)
 
     if (m_fireStringCallback) {
         if (gp->justPressed(jt::GamepadButtonCode::GBA)) {
-            m_fireStringCallback(0, gpAxis);
+            m_fireStringCallback(0, 1.0f / 48.0f * m_gpAxis);
         } else if (gp->justPressed(jt::GamepadButtonCode::GBB)) {
-            m_fireStringCallback(1, gpAxis);
+            m_fireStringCallback(1, 1.0f / 48.0f * m_gpAxis);
         } else if (gp->justPressed(jt::GamepadButtonCode::GBX)) {
-            m_fireStringCallback(2, gpAxis);
+            m_fireStringCallback(2, 1.0f / 48.0f * m_gpAxis);
         } else if (gp->justPressed(jt::GamepadButtonCode::GBY)) {
-            m_fireStringCallback(3, gpAxis);
+            m_fireStringCallback(3, 1.0f / 48.0f * m_gpAxis);
         }
     }
 }

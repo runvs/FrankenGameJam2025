@@ -417,7 +417,7 @@ void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
             + jt::Conversion::vec(GP::PhysicsStringMaxLengthInPx() * direction));
 
     if (!cb.hitSomething) {
-        auto snd = getGame()->audio().addTemporarySound("event:/faden-abschießen");
+        auto snd = getGame()->audio().addTemporarySound("event:/faden-trifft-nicht");
         snd->play();
         return;
     }

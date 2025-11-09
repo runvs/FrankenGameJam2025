@@ -3,7 +3,6 @@ TODO
 - Grafiken
     - Spikes
 - Level bauen
-- Zielpunkte eingefärbt u Partikel -> Stefan
 - Rope shorter/longer?
 - Sounds
     - spike
