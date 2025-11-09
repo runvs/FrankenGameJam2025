@@ -19,7 +19,11 @@
 
 #include "SpiderString.h"
 
-StatePlatformer::StatePlatformer(std::string const& levelName) { m_levelName = levelName; }
+StatePlatformer::StatePlatformer(PlayerType pt, std::string const& levelName)
+{
+    m_playerType = pt;
+    m_levelName = levelName;
+}
 
 class FancyCallbackFixtureThingy : public b2RayCastCallback {
 public:
@@ -121,7 +125,7 @@ void StatePlatformer::onUpdate(float const elapsed)
                 if (!m_ending) {
                     m_ending = true;
                     getGame()->stateManager().switchState(
-                        std::make_shared<StatePlatformer>(newLevelName));
+                        std::make_shared<StatePlatformer>(m_playerType, newLevelName));
                 }
             });
 
@@ -133,29 +137,30 @@ void StatePlatformer::onUpdate(float const elapsed)
         getGame()->stateManager().switchState(std::make_shared<StateMenu>());
     }
 
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F2)) {
-        getGame()->stateManager().switchState(
-            std::make_shared<StatePlatformer>("platformer_0_2.json"));
-    }
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F3)) {
-        getGame()->stateManager().switchState(
-            std::make_shared<StatePlatformer>("platformer_0_3.json"));
-    }
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F5)) {
-        getGame()->stateManager().switchState(
-            std::make_shared<StatePlatformer>("platformer_0_5.json"));
-    }
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F6)) {
-        getGame()->stateManager().switchState(
-            std::make_shared<StatePlatformer>("platformer_0_6.json"));
-    }
+    // if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F2)) {
+    //     getGame()->stateManager().switchState(
+    //         std::make_shared<StatePlatformer>("platformer_0_2.json"));
+    // }
+    // if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F3)) {
+    //     getGame()->stateManager().switchState(
+    //         std::make_shared<StatePlatformer>("platformer_0_3.json"));
+    // }
+    // if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F5)) {
+    //     getGame()->stateManager().switchState(
+    //         std::make_shared<StatePlatformer>("platformer_0_5.json"));
+    // }
+    // if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F6)) {
+    //     getGame()->stateManager().switchState(
+    //         std::make_shared<StatePlatformer>("platformer_0_6.json"));
+    // }
 }
 
 void StatePlatformer::endGame()
 {
     if (!m_ending) {
         m_ending = true;
-        getGame()->stateManager().switchState(std::make_shared<StatePlatformer>(m_levelName));
+        getGame()->stateManager().switchState(
+            std::make_shared<StatePlatformer>(m_playerType, m_levelName));
     }
 }
 
@@ -226,7 +231,7 @@ void StatePlatformer::onDraw() const
 
 void StatePlatformer::CreatePlayer()
 {
-    m_player = std::make_shared<Player>(m_world);
+    m_player = std::make_shared<Player>(m_playerType, m_world);
     m_player->setPosition(m_level->getPlayerStart());
     m_player->setLevelSize(m_level->getLevelSizeInPixel());
     add(m_player);

@@ -1,6 +1,7 @@
 ﻿#ifndef GAME_STATE_MENU_HPP
 #define GAME_STATE_MENU_HPP
 
+#include "player_type.hpp"
 #include "screeneffects/scanlines.hpp"
 #include <game_state.hpp>
 
@@ -36,6 +37,8 @@ private:
     int m_score { 0 };
 
     bool m_started { false };
+
+    PlayerType m_playerType { PlayerType::Arachno };
 
     void onCreate() override;
     void onEnter() override;

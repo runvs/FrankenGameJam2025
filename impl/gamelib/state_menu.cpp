@@ -198,6 +198,19 @@ void StateMenu::onUpdate(float const elapsed)
 {
     updateDrawables(elapsed);
     checkForTransitionToStateGame();
+
+    auto const& gp = getGame()->input().gamepad(0);
+    if (gp->justPressed(jt::GamepadButtonCode::GBA)) {
+        startTransitionToStateGame();
+    }
+
+    if (gp->justPressed(jt::GamepadButtonCode::GBY)) {
+        if (m_playerType == PlayerType::Arachno) {
+            m_playerType = PlayerType::Arachnono;
+        } else if (m_playerType == PlayerType::Arachnono) {
+            m_playerType = PlayerType::Arachno;
+        }
+    }
 }
 
 void StateMenu::updateDrawables(float const& elapsed)
@@ -228,7 +241,7 @@ void StateMenu::startTransitionToStateGame()
     if (!m_started) {
         m_started = true;
 
-        getGame()->stateManager().switchState(std::make_shared<StatePlatformer>());
+        getGame()->stateManager().switchState(std::make_shared<StatePlatformer>(m_playerType));
     }
 }
 

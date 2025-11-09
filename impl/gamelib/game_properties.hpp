@@ -19,7 +19,7 @@ public:
 
     static std::string JamDate() { return "FrankenGameJam 2025"; }
 
-    static std::string ExplanationText() { return ""; }
+    static std::string ExplanationText() { return "[A] to start\n[Y] to switch chars"; }
 
     static jt::Vector2f GetWindowSize() { return jt::Vector2f { 1024, 768 }; }
 

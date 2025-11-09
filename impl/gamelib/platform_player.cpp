@@ -5,8 +5,9 @@
 #include <math_helper.hpp>
 #include <user_data_entries.hpp>
 
-Player::Player(std::shared_ptr<jt::Box2DWorldInterface> world)
+Player::Player(PlayerType pt, std::shared_ptr<jt::Box2DWorldInterface> world)
 {
+    m_playerType = pt;
     b2BodyDef bodyDef;
     bodyDef.fixedRotation = true;
     bodyDef.type = b2_dynamicBody;
@@ -18,8 +19,13 @@ void Player::doCreate()
 {
     m_animation = std::make_shared<jt::Animation>();
 
-    m_animation->loadFromAseprite("assets/arachno.aseprite", textureManager());
-    m_animation->play("idle");
+    if (m_playerType == PlayerType::Arachno) {
+        m_animation->loadFromAseprite("assets/arachno.aseprite", textureManager());
+        m_animation->play("idle");
+    } else {
+        m_animation->loadFromAseprite("assets/arachnono.aseprite", textureManager());
+        m_animation->play("idle");
+    }
     m_animation->setOffset(jt::OffsetMode::CENTER);
 
     b2FixtureDef fixtureDef;
