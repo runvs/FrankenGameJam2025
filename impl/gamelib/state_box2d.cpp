@@ -177,6 +177,9 @@ void StatePlatformer::onCreate()
     for (int i = 0; i < m_stringParticleSystems.size(); i++) {
         m_stringLengthParticleSystems[i] = createStringLengthParticles(i);
     }
+
+    m_overlay
+        = jt::dh::createShapeRect(GP::GetScreenSize(), jt::colors::Transparent, textureManager());
 }
 
 void StatePlatformer::onEnter() { }
@@ -190,6 +193,7 @@ void StatePlatformer::loadLevel()
 void StatePlatformer::onUpdate(float const elapsed)
 {
     m_background->update(elapsed);
+    m_overlay->update(elapsed);
     for (auto m_active_string : m_activeStrings) {
         if (m_active_string != nullptr && m_active_string->isAlive()) {
             m_active_string->update(elapsed);
@@ -326,7 +330,7 @@ void StatePlatformer::onDraw() const
     m_player->draw();
     m_walkParticles->draw();
     m_playerJumpParticles->draw();
-    // m_scanlines->draw();
+    m_overlay->draw(renderTarget());
     m_vignette->draw();
 
     for (auto m_active_string : m_activeStrings) {
@@ -476,6 +480,9 @@ void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
     if (!cb.hitSomething) {
         auto snd = getGame()->audio().addTemporarySound("event:/faden-trifft-nicht");
         snd->play();
+        getGame()->gfx().camera().shake(0.2f, 3.0f);
+        auto c = jt::ColorFactory::fromHexString("#A1302F");
+        m_overlay->flash(0.1f, c);
         return;
     }
 

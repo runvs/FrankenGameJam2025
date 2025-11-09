@@ -38,6 +38,8 @@ private:
     std::array<std::shared_ptr<jt::ParticleSystem<jt::Shape, 100>>, 4>
         m_stringLengthParticleSystems {};
 
+    std::shared_ptr<jt::Shape> m_overlay;
+
     bool m_ending { false };
 
     std::string getName() const override;
