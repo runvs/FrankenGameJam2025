@@ -81,6 +81,8 @@ void StatePlatformer::onCreate()
     // add(m_scanlines);
 
     setAutoDraw(false);
+
+    shootString(0, { 0.0, -1.0 });
 }
 
 void StatePlatformer::onEnter() { }
@@ -350,8 +352,8 @@ void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
     } else if (stringIndex == 3) {
         c = jt::Color { 255, 211, 0, 255 };
     }
+    existingString->withTargetCircle();
     existingString->setStringColor(c);
-    existingString->withDebugCircle();
 
     m_activeStrings[stringIndex] = existingString;
 }

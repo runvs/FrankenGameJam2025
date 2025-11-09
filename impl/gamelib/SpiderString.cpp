@@ -38,25 +38,26 @@ void SpiderString::doUpdate(float elapsed)
     m_line->setLineVector(targetPos - spiderPos);
 
     m_line->update(elapsed);
-    if (m_debugCircle != nullptr) {
-        m_debugCircle->update(elapsed);
-    }
+    m_targetCircle->update(elapsed);
 }
 
-void SpiderString::withDebugCircle()
+void SpiderString::withTargetCircle()
 {
-    m_debugCircle = jt::dh::createShapeCircle(2.0, jt::Color { 255, 0, 0, 255 }, textureManager());
-
-    m_debugCircle->setPosition(jt::Conversion::vec(m_distance_joint->GetBodyB()->GetPosition()));
-    m_debugCircle->setOffset(jt::OffsetMode::CENTER);
+    m_targetCircle = jt::dh::createShapeCircle(2.0, jt::Color { 255, 0, 0, 255 }, textureManager());
+    m_targetCircle->setPosition(jt::Conversion::vec(m_distance_joint->GetBodyB()->GetPosition()));
+    m_targetCircle->setOffset(jt::OffsetMode::CENTER);
 }
 
-void SpiderString::setStringColor(jt::Color const& c) { m_line->setColor(c); }
+void SpiderString::setStringColor(jt::Color const& c)
+{
+    m_line->setColor(c);
+    m_targetCircle->setColor(c);
+}
 
 void SpiderString::doDraw() const
 {
-    if (m_debugCircle != nullptr) {
-        m_debugCircle->draw(renderTarget());
+    if (m_targetCircle != nullptr) {
+        m_targetCircle->draw(renderTarget());
 
         m_line->draw(renderTarget());
     }
