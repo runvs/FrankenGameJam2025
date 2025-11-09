@@ -403,6 +403,9 @@ jt::Color StatePlatformer::getStringColor(int stringIndex)
 
 void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
 {
+    if (jt::MathHelper::lengthSquared(direction) < 0.001) {
+        return;
+    }
     // std::cout << direction.x << "|" << direction.y << std::endl;
     auto& existingString = m_activeStrings[stringIndex];
 
