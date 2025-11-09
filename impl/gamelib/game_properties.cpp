@@ -50,8 +50,10 @@ float GP::PhysicsInitialRopeLengthFraction(float ropeLengthInPixel)
 {
 
     auto const v = 0.6f + 0.35f * std::clamp(ropeLengthInPixel / 350.0f, 0.0f, 1.0f);
-    std::cout << ropeLengthInPixel << " " << v << "\n";
+
     return v;
 }
 
 float GP::PhysicsStringMaxLengthInPx() { return 300.0f; }
+
+float GP::PhysicsStringBelowShrinkingValue() { return 8.0f; }

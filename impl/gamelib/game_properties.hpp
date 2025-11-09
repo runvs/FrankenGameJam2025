@@ -47,6 +47,7 @@ public:
     static float PhysicsStringDampingRatio();
     static float PhysicsInitialRopeLengthFraction(float ropeLengthInPixel);
     static float PhysicsStringMaxLengthInPx();
+    static float PhysicsStringBelowShrinkingValue();
 };
 
 #endif

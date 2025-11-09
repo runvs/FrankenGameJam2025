@@ -20,10 +20,10 @@ SpiderString::SpiderString(
     dJoint.frequencyHz = GP::PhysicsStringFrequency();
     dJoint.dampingRatio = GP::PhysicsStringDampingRatio();
 
-    auto const distanceJoint = world->createJoint(&dJoint);
+    auto const distanceJoint = (b2DistanceJoint*)world->createJoint(&dJoint);
     m_line = std::make_shared<jt::Line>();
-    m_distance_joint = std::shared_ptr<b2Joint>(
-        distanceJoint, [world](b2Joint* joint) { /*world->destroyJoint(joint);*/ });
+    m_distance_joint = std::shared_ptr<b2DistanceJoint>(
+        distanceJoint, [](b2DistanceJoint* /*joint*/) { /*world->destroyJoint(joint);*/ });
 }
 
 void SpiderString::doUpdate(float elapsed)
@@ -39,6 +39,17 @@ void SpiderString::doUpdate(float elapsed)
 
     m_line->update(elapsed);
     m_targetCircle->update(elapsed);
+
+    auto const ya = m_distance_joint->GetBodyA()->GetPosition().y;
+    auto const yb = m_distance_joint->GetBodyB()->GetPosition().y;
+
+    if (yb > ya + 10.0f) {
+        auto const currentLength = m_distance_joint->GetLength();
+        auto newLength = currentLength - GP::PhysicsStringBelowShrinkingValue() * elapsed;
+        std::cout << newLength << std::endl;
+        newLength = std::clamp(newLength, 16.0f, 1000000.0f);
+        m_distance_joint->SetLength(newLength);
+    }
 }
 
 void SpiderString::withTargetCircle()
