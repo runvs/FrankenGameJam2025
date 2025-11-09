@@ -146,7 +146,7 @@ void StatePlatformer::onCreate()
     m_background = std::make_shared<jt::Shape>();
     m_background->makeRect(GP::GetScreenSize(), textureManager());
     m_background->setColor(jt::ColorFactory::fromHexString("#393b3a"));
-    m_background->setCamMovementFactor(0.0f);
+    m_background->setIgnoreCamMovement(true);
     loadLevel();
 
     CreatePlayer();
@@ -180,6 +180,7 @@ void StatePlatformer::onCreate()
 
     m_overlay
         = jt::dh::createShapeRect(GP::GetScreenSize(), jt::colors::Transparent, textureManager());
+    m_overlay->setIgnoreCamMovement(true);
 }
 
 void StatePlatformer::onEnter() { }
