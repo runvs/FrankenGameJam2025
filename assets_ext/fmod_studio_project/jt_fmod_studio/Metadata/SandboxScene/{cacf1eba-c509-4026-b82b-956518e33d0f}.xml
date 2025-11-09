@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="SandboxScene" id="{cacf1eba-c509-4026-b82b-956518e33d0f}">
+		<property name="name">
+			<value>ducking-test</value>
+		</property>
+		<relationship name="folder">
+			<destination>{d486fe03-3d1a-48f1-bd49-0662ebaec835}</destination>
+		</relationship>
+		<relationship name="markerTracks">
+			<destination>{49e0222a-577b-436e-b581-622cc84c225f}</destination>
+		</relationship>
+		<relationship name="timeline">
+			<destination>{5975cdd0-88a7-4cc7-b1c1-730173944cec}</destination>
+		</relationship>
+		<relationship name="emitters">
+			<destination>{98578b25-38a5-4670-b0ee-04ecdbc3af15}</destination>
+			<destination>{b3dd1bff-d521-4f12-9ffb-96fcedd25406}</destination>
+		</relationship>
+	</object>
+	<object class="MarkerTrack" id="{49e0222a-577b-436e-b581-622cc84c225f}" />
+	<object class="Timeline" id="{5975cdd0-88a7-4cc7-b1c1-730173944cec}" />
+	<object class="SandboxEmitter" id="{98578b25-38a5-4670-b0ee-04ecdbc3af15}">
+		<property name="positionX">
+			<value>-13.3000002</value>
+		</property>
+		<property name="positionZ">
+			<value>12.3500004</value>
+		</property>
+		<relationship name="event">
+			<destination>{b37551ec-37a6-433f-a0d0-43c0a8956f8a}</destination>
+		</relationship>
+	</object>
+	<object class="SandboxEmitter" id="{b3dd1bff-d521-4f12-9ffb-96fcedd25406}">
+		<property name="positionX">
+			<value>-4.55000019</value>
+		</property>
+		<property name="positionZ">
+			<value>8.27500057</value>
+		</property>
+		<relationship name="event">
+			<destination>{8f7e268a-3905-4ba0-82ef-c9730e123548}</destination>
+		</relationship>
+	</object>
+</objects>
