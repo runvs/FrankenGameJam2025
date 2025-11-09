@@ -94,7 +94,7 @@
                  "y":288
                 }, 
                 {
-                 "height":8,
+                 "height":32,
                  "id":4,
                  "name":"exit",
                  "properties":[
@@ -106,9 +106,9 @@
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":8,
-                 "x":788,
-                 "y":213
+                 "width":32,
+                 "x":784,
+                 "y":208
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -120,7 +120,7 @@
  "nextobjectid":6,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.11.0",
+ "tiledversion":"1.11.1-99-gec89c545",
  "tileheight":16,
  "tilesets":[
         {

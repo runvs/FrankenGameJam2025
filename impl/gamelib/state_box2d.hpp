@@ -35,6 +35,8 @@ private:
     std::array<std::shared_ptr<SpiderString>, 4> m_activeStrings {};
     std::array<std::shared_ptr<jt::Box2DObject>, 4> m_tempStringAnchors {};
     std::array<std::shared_ptr<jt::ParticleSystem<jt::Shape, 100>>, 4> m_stringParticleSystems {};
+    std::array<std::shared_ptr<jt::ParticleSystem<jt::Shape, 100>>, 4>
+        m_stringLengthParticleSystems {};
 
     bool m_ending { false };
 
@@ -54,6 +56,7 @@ private:
     void createPlayerWalkParticles();
     void createPlayerJumpParticleSystem();
     std::shared_ptr<jt::ParticleSystem<jt::Shape, 100>> createStringParticles(int index);
+    std::shared_ptr<jt::ParticleSystem<jt::Shape, 100>> createStringLengthParticles(int index);
 };
 
 #endif // DEMO_STATE_PLATFORMER_HPP

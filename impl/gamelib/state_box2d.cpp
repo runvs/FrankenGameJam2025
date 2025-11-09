@@ -61,6 +61,42 @@ private:
     float m_distanceToBestHit;
 };
 
+std::shared_ptr<jt::ParticleSystem<jt::Shape, 100>> StatePlatformer::createStringLengthParticles(
+    int index)
+{
+    auto color = getStringColor(index);
+    auto particles = jt::ParticleSystem<jt::Shape, 100>::createPS(
+        [this, color]() {
+            auto s = jt::dh::createShapeCircle(2, color, textureManager());
+            s->setOrigin(jt::Vector2f { 0, 0 });
+            s->setScale(jt::Vector2f { 0.5f, 0.5f });
+            return s;
+        },
+        [this](auto& s, auto pos) {
+            auto totalTime = 0.25f;
+            auto const ageFn = [](float t) {
+                t = std::clamp(t, 0.0f, 1.0f);
+                return t > 0.999 ? 1.0f : 1.0f - pow(2.0f, -5.0f * t);
+            };
+
+            auto twa = jt::TweenAlpha::create(s, totalTime, 255, 0);
+            twa->setAgePercentConversion(ageFn);
+            add(twa);
+
+            auto tws = jt::TweenScale::create(
+                s, totalTime, jt::Vector2f { 1.0, 1.0 }, jt::Vector2f { 0.0f, 0.0f });
+            tws->setAgePercentConversion(ageFn);
+            add(tws);
+
+            auto const endPos = pos + jt::Random::getRandomPointIn(jt::Vector2f { 1.0f, 16.0f });
+            auto twp = jt::TweenPosition::create(s, totalTime, pos, endPos);
+            twp->setAgePercentConversion(ageFn);
+            add(twp);
+        });
+    add(particles);
+    return particles;
+}
+
 std::shared_ptr<jt::ParticleSystem<jt::Shape, 100>> StatePlatformer::createStringParticles(
     int index)
 {
@@ -79,8 +115,6 @@ std::shared_ptr<jt::ParticleSystem<jt::Shape, 100>> StatePlatformer::createStrin
                 return t > 0.999 ? 1.0f : 1.0f - pow(2.0f, -5.0f * t);
             };
 
-            s->setPosition(jt::Random::getRandomPointIn(jt::Rectf { 0, 0, 100, 300 }));
-
             auto twa = jt::TweenAlpha::create(s, totalTime, 255, 0);
             twa->setAgePercentConversion(ageFn);
             add(twa);
@@ -90,7 +124,7 @@ std::shared_ptr<jt::ParticleSystem<jt::Shape, 100>> StatePlatformer::createStrin
             tws->setAgePercentConversion(ageFn);
             add(tws);
 
-            auto const maxVariance = 20.0f;
+            auto const maxVariance = 40.0f;
             auto const startPos = pos;
             auto const endPos = pos + jt::Random::getRandomPointInCircle(maxVariance);
             auto twp = jt::TweenPosition::create(s, totalTime, startPos, endPos);
@@ -111,7 +145,7 @@ void StatePlatformer::onCreate()
 
     m_background = std::make_shared<jt::Shape>();
     m_background->makeRect(GP::GetScreenSize(), textureManager());
-    m_background->setColor(jt::ColorFactory::fromHexString("#203835"));
+    m_background->setColor(jt::ColorFactory::fromHexString("#393b3a"));
     m_background->setCamMovementFactor(0.0f);
     loadLevel();
 
@@ -138,6 +172,10 @@ void StatePlatformer::onCreate()
     auto rng = std::default_random_engine {};
     for (int i = 0; i < m_stringParticleSystems.size(); i++) {
         m_stringParticleSystems[i] = createStringParticles(i);
+    }
+
+    for (int i = 0; i < m_stringParticleSystems.size(); i++) {
+        m_stringLengthParticleSystems[i] = createStringLengthParticles(i);
     }
 }
 
@@ -206,6 +244,7 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
     float const topMargin = 150.0f;
     float const bottomMargin = 50.0f;
     float const rightMargin = 150.0f;
+
     float const leftMargin = 150.0f;
     float const scrollSpeed = 60.0f;
     auto& cam = getGame()->gfx().camera();
@@ -276,7 +315,10 @@ void StatePlatformer::onDraw() const
 {
     m_background->draw(renderTarget());
     m_player->drawRopeTarget(renderTarget());
-    for (auto particle_system : m_stringParticleSystems) {
+    for (auto const& particle_system : m_stringParticleSystems) {
+        particle_system->draw();
+    }
+    for (auto const& particle_system : m_stringLengthParticleSystems) {
         particle_system->draw();
     }
     m_level->draw();
@@ -453,6 +495,13 @@ void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
 
     m_activeStrings[stringIndex] = existingString;
     m_stringParticleSystems[stringIndex]->fire(50, jt::Conversion::vec(cb.hitPoint));
+
+    auto startToEnd = jt::Conversion::vec(cb.hitPoint) - m_player->getPosition();
+
+    for (auto i = 0; i != 30; ++i) {
+        auto const pos = m_player->getPosition() + jt::Random::getFloat(0.0f, 1.0f) * startToEnd;
+        m_stringLengthParticleSystems[stringIndex]->fire(2u, pos);
+    }
     auto snd = getGame()->audio().addTemporarySound("event:/faden-abschießen");
     snd->play();
 }
