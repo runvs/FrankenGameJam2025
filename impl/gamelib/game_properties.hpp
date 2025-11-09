@@ -13,7 +13,7 @@ public:
 
     static std::string GameName() { return "ArachnoSwing"; }
 
-    static std::string AuthorName() { return "Adkiem, BloodyOrange, Jacudibu, Laguna_999"; }
+    static std::string AuthorName() { return "BloodyOrange, Jacudibu Laguna_999, man00ka"; }
 
     static std::string JamName() { return ""; }
 
@@ -29,13 +29,13 @@ public:
 
     static jt::Color PaletteBackground() { return GP::getPalette().getColor(4); }
 
-    static jt::Color PaletteFontFront() { return GP::getPalette().getColor(0); }
+    static jt::Color PaletteFontFront() { return jt::Color { 210, 205, 209 }; }
 
     static jt::Color PalleteFrontHighlight() { return GP::getPalette().getColor(1); }
 
     static jt::Color PaletteFontShadow() { return GP::getPalette().getColor(2); }
 
-    static jt::Color PaletteFontCredits() { return GP::getPalette().getColor(1); }
+    static jt::Color PaletteFontCredits() { return jt::Color { 255, 166, 207 }; }
 
     static jt::Palette getPalette();
 

@@ -89,7 +89,7 @@ void StateMenu::createTextExplanation()
     m_textExplanation
         = jt::dh::createText(renderTarget(), GP::ExplanationText(), 16u, GP::PaletteFontFront());
     auto const half_width = GP::GetScreenSize().x / 2.0f;
-    m_textExplanation->setPosition({ half_width, 100 });
+    m_textExplanation->setPosition({ half_width, 280 });
     m_textExplanation->setShadow(GP::PaletteFontShadow(), jt::Vector2f { 2, 2 });
 }
 
@@ -118,8 +118,7 @@ void StateMenu::createTextCredits()
 void StateMenu::createTextStart()
 {
     auto const half_width = GP::GetScreenSize().x / 2.0f;
-    m_textStart = jt::dh::createText(
-        renderTarget(), "Press Space to start the game", 16u, GP::PaletteFontFront());
+    m_textStart = jt::dh::createText(renderTarget(), "", 16u, GP::PaletteFontFront());
     m_textStart->setPosition({ half_width, 70 });
     m_textStart->setShadow(GP::PaletteFontShadow(), jt::Vector2f { 2, 2 });
 }
@@ -127,7 +126,7 @@ void StateMenu::createTextStart()
 void StateMenu::createTextTitle()
 {
     float half_width = GP::GetScreenSize().x / 2;
-    m_textTitle = jt::dh::createText(renderTarget(), GP::GameName(), 32u, GP::PaletteFontFront());
+    m_textTitle = jt::dh::createText(renderTarget(), "", 32u, GP::PaletteFontFront());
     m_textTitle->setPosition({ half_width, 10 });
     m_textTitle->setShadow(GP::PaletteFontShadow(), jt::Vector2f { 3, 3 });
 }
