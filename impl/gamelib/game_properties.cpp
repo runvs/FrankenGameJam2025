@@ -1,6 +1,8 @@
 ﻿#include "game_properties.hpp"
 #include <color/palette_builder.hpp>
 
+#include <iostream>
+
 namespace {
 
 jt::Palette createPalette()
@@ -37,3 +39,19 @@ int GP::PhysicVelocityIterations() { return 20; }
 int GP::PhysicPositionIterations() { return 15; }
 
 jt::Vector2f GP::PlayerSize() { return jt::Vector2f { 16.0f, 16.0f }; }
+
+float GP::PhysicsGravityStrength() { return 200.0f; }
+
+float GP::PhysicsStringFrequency() { return 0.5f; }
+
+float GP::PhysicsStringDampingRatio() { return 0.01f; }
+
+float GP::PhysicsInitialRopeLengthFraction(float ropeLengthInPixel)
+{
+
+    auto const v = 0.6f + 0.35f * std::clamp(ropeLengthInPixel / 350.0f, 0.0f, 1.0f);
+    std::cout << ropeLengthInPixel << " " << v << "\n";
+    return v;
+}
+
+float GP::PhysicsStringMaxLengthInPx() { return 350.0f; }

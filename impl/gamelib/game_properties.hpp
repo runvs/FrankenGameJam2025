@@ -4,6 +4,7 @@
 #include <color/color.hpp>
 #include <color/palette.hpp>
 #include <vector.hpp>
+#include <Box2D/Common/b2Settings.h>
 #include <string>
 
 class GP {
@@ -41,6 +42,11 @@ public:
     static int PhysicVelocityIterations();
     static int PhysicPositionIterations();
     static jt::Vector2f PlayerSize();
+    static float PhysicsGravityStrength();
+    static float PhysicsStringFrequency();
+    static float PhysicsStringDampingRatio();
+    static float PhysicsInitialRopeLengthFraction(float ropeLengthInPixel);
+    static float PhysicsStringMaxLengthInPx();
 };
 
 #endif

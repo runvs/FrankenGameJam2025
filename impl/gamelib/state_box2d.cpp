@@ -59,7 +59,7 @@ void StatePlatformer::onCreate()
     auto loggingContactManager
         = std::make_shared<jt::LoggingBox2DContactManager>(contactManager, getGame()->logger());
     m_world = std::make_shared<jt::Box2DWorldImpl>(
-        jt::Vector2f { 0.0f, 200.0f }, loggingContactManager);
+        jt::Vector2f { 0.0f, GP::PhysicsGravityStrength() }, loggingContactManager);
 
     loadLevel();
 
@@ -319,7 +319,8 @@ void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
 
     auto cb = FancyCallbackFixtureThingy { &m_player->getB2Body()->GetFixtureList()[0] };
     m_world->getWorld()->RayCast(&cb, m_player->getB2Body()->GetPosition(),
-        m_player->getB2Body()->GetPosition() + jt::Conversion::vec(1000.0f * direction));
+        m_player->getB2Body()->GetPosition()
+            + jt::Conversion::vec(GP::PhysicsStringMaxLengthInPx() * direction));
 
     if (!cb.hitSomething) {
         return;
@@ -330,11 +331,11 @@ void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
     target.position = cb.hitPoint;
     target.type = b2_kinematicBody;
 
-    auto anchor = std::make_shared<jt::Box2DObject>(m_world, &target);
+    m_tempStringAnchors[stringIndex] = std::make_shared<jt::Box2DObject>(m_world, &target);
 
     // TODO: Fancily shoot string outwards
-    existingString
-        = std::make_shared<SpiderString>(m_world, m_player->getB2Body(), anchor->getB2Body());
+    existingString = std::make_shared<SpiderString>(
+        m_world, m_player->getB2Body(), m_tempStringAnchors[stringIndex]->getB2Body());
     add(existingString);
     jt::Color c;
 
@@ -351,5 +352,4 @@ void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
     existingString->withDebugCircle();
 
     m_activeStrings[stringIndex] = existingString;
-    m_tempStringAnchors[stringIndex] = anchor;
 }

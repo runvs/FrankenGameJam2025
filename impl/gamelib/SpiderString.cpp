@@ -2,6 +2,7 @@
 
 #include "conversions.hpp"
 #include "drawable_helpers.hpp"
+#include "game_properties.hpp"
 
 #include <iostream>
 
@@ -12,27 +13,17 @@ SpiderString::SpiderString(
     dJoint.bodyA = from;
     dJoint.localAnchorA = b2Vec2 { 0.0, 0.0 };
     dJoint.bodyB = to;
-    dJoint.localAnchorB = b2Vec2 { 0.0, 0.0 }; // TODO needs to be local raycast hit point
+    dJoint.localAnchorB = b2Vec2 { 0.0, 0.0 };
 
-    dJoint.length = (from->GetPosition() - to->GetPosition()).Length() * 0.75f;
-    dJoint.frequencyHz = 0.5;
-    dJoint.dampingRatio = 0.01;
+    auto const fullLength = (from->GetPosition() - to->GetPosition()).Length();
+    dJoint.length = fullLength * GP::PhysicsInitialRopeLengthFraction(fullLength);
+    dJoint.frequencyHz = GP::PhysicsStringFrequency();
+    dJoint.dampingRatio = GP::PhysicsStringDampingRatio();
 
     auto const distanceJoint = world->createJoint(&dJoint);
     m_line = std::make_shared<jt::Line>();
     m_distance_joint = std::shared_ptr<b2Joint>(
         distanceJoint, [world](b2Joint* joint) { world->destroyJoint(joint); });
-
-    // auto rJoint = b2RopeJointDef {};
-    // rJoint.bodyA = from;
-    // rJoint.localAnchorA = dJoint.localAnchorA;
-    // rJoint.bodyB = to;
-    // rJoint.localAnchorB = dJoint.localAnchorB;
-    // rJoint.maxLength = 50.0;
-    // auto const ropeJoint = world->createJoint(&rJoint);
-    // m_rope_joint = std::shared_ptr<b2Joint>(ropeJoint, [world](b2Joint* joint) {
-    // world->destroyJoint(joint);
-    // });
 }
 
 void SpiderString::doUpdate(float elapsed)
