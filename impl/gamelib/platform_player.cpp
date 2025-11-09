@@ -67,10 +67,8 @@ void Player::clampPositionToLevelSize(jt::Vector2f& currentPosition) const
 
 void Player::updateAnimation(float elapsed) { m_animation->update(elapsed); }
 
-void Player::handleMovement(float const elapsed)
+void Player::handleMovement(float const /*elapsed*/)
 {
-    auto v = m_physicsObject->getVelocity();
-    auto const kb = getGame()->input().keyboard().get();
     auto gp = getGame()->input().gamepad(0).get();
 
     jt::Vector2f gpAxis = gp->getAxis(jt::GamepadAxisCode::ALeft);
