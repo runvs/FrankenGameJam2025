@@ -26,13 +26,16 @@ SpiderString::SpiderString(
         distanceJoint, [](b2DistanceJoint* /*joint*/) { /*world->destroyJoint(joint);*/ });
 }
 
-void SpiderString::doUpdate(float elapsed)
+void SpiderString::doUpdate(float const elapsed)
 {
     // auto a = m_distance_joint->GetBodyA()->GetPosition();
     // auto b = m_distance_joint->GetBodyB()->GetPosition();
     // std::cout << a.x << "|" << a.y << "<-->" << b.x << "|" << b.y << std::endl;
-    auto spiderPos = jt::Conversion::vec(m_distance_joint->GetBodyA()->GetPosition());
-    auto targetPos = jt::Conversion::vec(m_distance_joint->GetBodyB()->GetPosition());
+    if (m_distance_joint == nullptr) {
+        return;
+    }
+    auto const spiderPos = jt::Conversion::vec(m_distance_joint->GetBodyA()->GetPosition());
+    auto const targetPos = jt::Conversion::vec(m_distance_joint->GetBodyB()->GetPosition());
 
     m_line->setPosition(spiderPos);
     m_line->setLineVector(targetPos - spiderPos);
