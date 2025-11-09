@@ -30,6 +30,8 @@ private:
     std::shared_ptr<jt::Text> m_textCredits;
     std::shared_ptr<jt::Text> m_textVersion;
 
+    std::shared_ptr<jt::Animation> m_arachno;
+    std::shared_ptr<jt::Animation> m_arachnono;
     std::shared_ptr<jt::Shape> m_overlay;
     std::shared_ptr<jt::Vignette> m_vignette;
     std::shared_ptr<jt::ScanLines> m_scanlines { nullptr };

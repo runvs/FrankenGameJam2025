@@ -23,6 +23,18 @@ void StateMenu::onCreate()
     createShapes();
     createVignette();
 
+    m_arachno = std::make_shared<jt::Animation>();
+    m_arachno->loadFromAseprite("assets/arachno.aseprite", textureManager());
+    m_arachno->play("idle");
+    m_arachno->setOffset(jt::OffsetMode::CENTER);
+    m_arachno->setPosition({ 100.0f, 100.0f });
+
+    m_arachnono = std::make_shared<jt::Animation>();
+    m_arachnono->loadFromAseprite("assets/arachnono.aseprite", textureManager());
+    m_arachnono->play("idle");
+    m_arachnono->setOffset(jt::OffsetMode::CENTER);
+    m_arachnono->setPosition({ 100.0f, 200.0f });
+
     add(std::make_shared<jt::LicenseInfo>());
 
     try {
@@ -41,6 +53,11 @@ void StateMenu::onEnter()
 {
     createTweens();
     m_started = false;
+
+    auto twa = jt::TweenAlpha::create(m_arachnono, 0.5f, 255, 50);
+    twa->setStartDelay(0.2f);
+    twa->setSkipTicks();
+    add(twa);
 }
 
 void StateMenu::createVignette()
@@ -207,10 +224,33 @@ void StateMenu::onUpdate(float const elapsed)
     if (gp->justPressed(jt::GamepadButtonCode::GBY)) {
         if (m_playerType == PlayerType::Arachno) {
             m_playerType = PlayerType::Arachnono;
+
+            auto twaOut = jt::TweenAlpha::create(m_arachno, 0.25f, m_arachno->getColor().a, 50);
+            twaOut->setStartDelay(0.2f);
+            twaOut->setSkipTicks();
+            add(twaOut);
+
+            auto twaIn = jt::TweenAlpha::create(m_arachnono, 0.25f, m_arachnono->getColor().a, 255);
+            twaIn->setStartDelay(0.2f);
+            twaIn->setSkipTicks();
+            add(twaIn);
+
         } else if (m_playerType == PlayerType::Arachnono) {
             m_playerType = PlayerType::Arachno;
+
+            auto twaOut = jt::TweenAlpha::create(m_arachnono, 0.25f, m_arachnono->getColor().a, 50);
+            twaOut->setStartDelay(0.2f);
+            twaOut->setSkipTicks();
+            add(twaOut);
+
+            auto twaIn = jt::TweenAlpha::create(m_arachno, 0.25f, m_arachno->getColor().a, 255);
+            twaIn->setStartDelay(0.2f);
+            twaIn->setSkipTicks();
+            add(twaIn);
         }
     }
+    m_arachno->update(elapsed);
+    m_arachnono->update(elapsed);
 }
 
 void StateMenu::updateDrawables(float const& elapsed)
@@ -248,6 +288,10 @@ void StateMenu::startTransitionToStateGame()
 void StateMenu::onDraw() const
 {
     m_background->draw(renderTarget());
+
+    m_arachno->draw(renderTarget());
+    m_arachnono->draw(renderTarget());
+
     m_textTitle->draw(renderTarget());
     m_textStart->draw(renderTarget());
     m_textExplanation->draw(renderTarget());
