@@ -46,7 +46,7 @@ float GP::PhysicsStringFrequency() { return 0.5f; }
 
 float GP::PhysicsStringDampingRatio() { return 0.01f; }
 
-float GP::PhysicsInitialRopeLengthFraction(float ropeLengthInPixel)
+float GP::PhysicsInitialRopeLengthFraction(float const ropeLengthInPixel)
 {
 
     auto const v = 0.6f + 0.35f * std::clamp(ropeLengthInPixel / 350.0f, 0.0f, 1.0f);
