@@ -13,13 +13,13 @@ public:
 
     static std::string GameName() { return "ArachnoSwing"; }
 
-    static std::string AuthorName() { return "Laguna_999"; }
+    static std::string AuthorName() { return "Adkiem, BloodyOrange, Jacudibu, Laguna_999"; }
 
     static std::string JamName() { return ""; }
 
     static std::string JamDate() { return "FrankenGameJam 2025"; }
 
-    static std::string ExplanationText() { return "[W,D] to move \n[W] to jump"; }
+    static std::string ExplanationText() { return ""; }
 
     static jt::Vector2f GetWindowSize() { return jt::Vector2f { 1024, 768 }; }
 
