@@ -5,7 +5,6 @@
 #include <fmod.hpp>
 #include <fmod_studio.hpp>
 #include <map>
-#include <vector>
 
 namespace jt {
 

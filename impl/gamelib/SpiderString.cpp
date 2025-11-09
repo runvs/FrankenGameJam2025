@@ -23,7 +23,7 @@ SpiderString::SpiderString(
     auto const distanceJoint = world->createJoint(&dJoint);
     m_line = std::make_shared<jt::Line>();
     m_distance_joint = std::shared_ptr<b2Joint>(
-        distanceJoint, [world](b2Joint* joint) { world->destroyJoint(joint); });
+        distanceJoint, [world](b2Joint* joint) { /*world->destroyJoint(joint);*/ });
 }
 
 void SpiderString::doUpdate(float elapsed)

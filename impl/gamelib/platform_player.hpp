@@ -2,6 +2,7 @@
 #define JAMTEMPLATE_DEMO_PLATFORM_PLAYER
 
 #include "line.hpp"
+#include "player_type.hpp"
 #include <animation.hpp>
 #include <box2dwrapper/box2d_object.hpp>
 #include <game_object.hpp>
@@ -13,7 +14,7 @@
 class Player : public jt::GameObject {
 public:
     using Sptr = std::shared_ptr<Player>;
-    Player(std::shared_ptr<jt::Box2DWorldInterface> world);
+    Player(PlayerType pt, std::shared_ptr<jt::Box2DWorldInterface> world);
 
     ~Player() = default;
 
@@ -35,6 +36,7 @@ public:
     void drawRopeTarget(std::shared_ptr<jt::RenderTargetInterface> targetContainer);
 
 private:
+    PlayerType m_playerType;
     std::shared_ptr<jt::Animation> m_animation;
     std::shared_ptr<jt::Box2DObject> m_physicsObject;
     std::shared_ptr<jt::Line> m_crosshairV;

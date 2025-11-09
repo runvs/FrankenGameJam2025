@@ -8,7 +8,6 @@
 #include "game_properties.hpp"
 #include "lerp.hpp"
 #include "state_menu.hpp"
-#include "tweens/tween_color.hpp"
 #include "tweens/tween_scale.hpp"
 #include <box2dwrapper/box2d_contact_manager.hpp>
 #include <box2dwrapper/box2d_world_impl.hpp>
@@ -23,7 +22,11 @@
 
 #include "SpiderString.h"
 
-StatePlatformer::StatePlatformer(std::string const& levelName) { m_levelName = levelName; }
+StatePlatformer::StatePlatformer(PlayerType pt, std::string const& levelName)
+{
+    m_playerType = pt;
+    m_levelName = levelName;
+}
 
 class FancyCallbackFixtureThingy : public b2RayCastCallback {
 public:
@@ -106,6 +109,10 @@ void StatePlatformer::onCreate()
     m_world = std::make_shared<jt::Box2DWorldImpl>(
         jt::Vector2f { 0.0f, GP::PhysicsGravityStrength() }, loggingContactManager);
 
+    m_background = std::make_shared<jt::Shape>();
+    m_background->makeRect(GP::GetScreenSize(), textureManager());
+    m_background->setColor(jt::ColorFactory::fromHexString("#203835"));
+    m_background->setCamMovementFactor(0.0f);
     loadLevel();
 
     CreatePlayer();
@@ -143,6 +150,12 @@ void StatePlatformer::loadLevel()
 
 void StatePlatformer::onUpdate(float const elapsed)
 {
+    m_background->update(elapsed);
+    for (auto m_active_string : m_activeStrings) {
+        if (m_active_string != nullptr && m_active_string->isAlive()) {
+            m_active_string->update(elapsed);
+        }
+    }
     if (getGame()->input().keyboard()->justPressed(jt::KeyCode::Space)) {
         shootString(0, { 0.0, -1.0 });
     }
@@ -160,8 +173,10 @@ void StatePlatformer::onUpdate(float const elapsed)
             m_player->getPosition(), [this](std::string const& newLevelName) {
                 if (!m_ending) {
                     m_ending = true;
+                    auto snd = getGame()->audio().addTemporarySound("event:/win-sound");
+                    snd->play();
                     getGame()->stateManager().switchState(
-                        std::make_shared<StatePlatformer>(newLevelName));
+                        std::make_shared<StatePlatformer>(m_playerType, newLevelName));
                 }
             });
 
@@ -173,29 +188,30 @@ void StatePlatformer::onUpdate(float const elapsed)
         getGame()->stateManager().switchState(std::make_shared<StateMenu>());
     }
 
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F2)) {
-        getGame()->stateManager().switchState(
-            std::make_shared<StatePlatformer>("platformer_0_2.json"));
-    }
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F3)) {
-        getGame()->stateManager().switchState(
-            std::make_shared<StatePlatformer>("platformer_0_3.json"));
-    }
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F5)) {
-        getGame()->stateManager().switchState(
-            std::make_shared<StatePlatformer>("platformer_0_5.json"));
-    }
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F6)) {
-        getGame()->stateManager().switchState(
-            std::make_shared<StatePlatformer>("platformer_0_6.json"));
-    }
+    // if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F2)) {
+    //     getGame()->stateManager().switchState(
+    //         std::make_shared<StatePlatformer>("platformer_0_2.json"));
+    // }
+    // if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F3)) {
+    //     getGame()->stateManager().switchState(
+    //         std::make_shared<StatePlatformer>("platformer_0_3.json"));
+    // }
+    // if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F5)) {
+    //     getGame()->stateManager().switchState(
+    //         std::make_shared<StatePlatformer>("platformer_0_5.json"));
+    // }
+    // if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F6)) {
+    //     getGame()->stateManager().switchState(
+    //         std::make_shared<StatePlatformer>("platformer_0_6.json"));
+    // }
 }
 
 void StatePlatformer::endGame()
 {
     if (!m_ending) {
         m_ending = true;
-        getGame()->stateManager().switchState(std::make_shared<StatePlatformer>(m_levelName));
+        getGame()->stateManager().switchState(
+            std::make_shared<StatePlatformer>(m_playerType, m_levelName));
     }
 }
 
@@ -209,16 +225,23 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
     float const scrollSpeed = 60.0f;
     auto& cam = getGame()->gfx().camera();
 
-    auto const screenWidth = 0.5f * 1024.0f;
+    auto const screenWidth = GP::GetScreenSize().x;
+
     if (ps.x < leftMargin) {
         cam.move(jt::Vector2f { -scrollSpeed * elapsed, 0.0f });
         if (ps.x < rightMargin / 2) {
             cam.move(jt::Vector2f { -scrollSpeed * elapsed, 0.0f });
+            if (ps.x < 0.0) {
+                cam.move(jt::Vector2f { -scrollSpeed * elapsed, 0.0f });
+            }
         }
     } else if (ps.x > screenWidth - rightMargin) {
         cam.move(jt::Vector2f { scrollSpeed * elapsed, 0.0f });
         if (ps.x > screenWidth - rightMargin / 3 * 2) {
             cam.move(jt::Vector2f { scrollSpeed * elapsed, 0.0f });
+            if (ps.x > screenWidth) {
+                cam.move(jt::Vector2f { scrollSpeed * elapsed, 0.0f });
+            }
         }
     }
 
@@ -229,6 +252,8 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
     }
     auto const levelWidth = m_level->getLevelSizeInPixel().x;
     auto const maxCamPosition = levelWidth - screenWidth;
+    // std::cout << ps.x << " " << screenWidth << " " << levelWidth << " " << maxCamPosition
+    //           << std::endl;
     if (offset.x > maxCamPosition) {
         offset.x = maxCamPosition;
     }
@@ -237,6 +262,7 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
 
 void StatePlatformer::onDraw() const
 {
+    m_background->draw(renderTarget());
     m_player->drawRopeTarget(renderTarget());
     for (auto particle_system : m_stringParticleSystems) {
         particle_system->draw();
@@ -258,7 +284,7 @@ void StatePlatformer::onDraw() const
 
 void StatePlatformer::CreatePlayer()
 {
-    m_player = std::make_shared<Player>(m_world);
+    m_player = std::make_shared<Player>(m_playerType, m_world);
     m_player->setPosition(m_level->getPlayerStart());
     m_player->setLevelSize(m_level->getLevelSizeInPixel());
     add(m_player);
@@ -391,6 +417,8 @@ void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
             + jt::Conversion::vec(GP::PhysicsStringMaxLengthInPx() * direction));
 
     if (!cb.hitSomething) {
+        auto snd = getGame()->audio().addTemporarySound("event:/faden-abschießen");
+        snd->play();
         return;
     }
 
@@ -409,6 +437,7 @@ void StatePlatformer::shootString(int stringIndex, jt::Vector2f direction)
     existingString->setStringColor(c);
 
     m_activeStrings[stringIndex] = existingString;
-
     m_stringParticleSystems[stringIndex]->fire(50, jt::Conversion::vec(cb.hitPoint));
+    auto snd = getGame()->audio().addTemporarySound("event:/faden-abschießen");
+    snd->play();
 }

@@ -107,7 +107,7 @@ void Level::loadMovingPlatforms(jt::tilemap::TilesonLoader& loader)
 void Level::loadLevelSize(jt::tilemap::TilesonLoader const& loader)
 {
     auto const sizeInTiles = loader.getMapSizeInTiles();
-    m_levelSizeInPixel = jt::Vector2f { 8.0f * sizeInTiles.x, 8.0f * sizeInTiles.y };
+    m_levelSizeInPixel = jt::Vector2f { 16.0f * sizeInTiles.x, 16.0f * sizeInTiles.y };
 }
 
 void Level::loadLevelKillboxes(jt::tilemap::TilesonLoader& loader)
